@@ -1,0 +1,7 @@
+plugins {
+}
+
+group = 'com.boldfaced7.foreign-exchange.common'
+version = '0.0.1-SNAPSHOT'
+
+dependencies {}
