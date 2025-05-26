@@ -1,11 +1,8 @@
 package com.boldfaced7.fxexchange.exchange.domain.model;
 
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
-import com.boldfaced7.fxexchange.exchange.domain.event.deposit.*;
-import com.boldfaced7.fxexchange.exchange.domain.event.exchange.ExchangeCompleted;
-import com.boldfaced7.fxexchange.exchange.domain.event.exchange.ExchangeFailed;
-import com.boldfaced7.fxexchange.exchange.domain.event.exchange.ExchangeStarted;
-import com.boldfaced7.fxexchange.exchange.domain.event.withdrawal.*;
+import com.boldfaced7.fxexchange.exchange.domain.event.buy.*;
+import com.boldfaced7.fxexchange.exchange.domain.event.sell.*;
 import com.boldfaced7.fxexchange.exchange.domain.vo.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -125,71 +122,92 @@ public class ExchangeRequest {
     }
 
     /*
-        환전 관련 이벤트 생성
+        환전(외화 구매) 관련 이벤트 생성
      */
-    public void markExchangeStarted() {
-        events.add(new ExchangeStarted(requestId));
+    public void buyingStarted() {
+        events.add(new BuyingStarted(requestId));
     }
 
-    public void markExchangeFailed() {
-        events.add(new ExchangeFailed(requestId));
+    public void buyingFailed() {
+        events.add(new BuyingFailed(requestId));
     }
 
-    public void markExchangeCompleted() {
-        events.add(new ExchangeCompleted(requestId));
+    public void buyingCompleted() {
+        events.add(new BuyingCompleted(requestId));
     }
 
     /*
-        출금 관련 이벤트 생성
+        원화 출금 관련 이벤트 생성
      */
-    public void markWithdrawalCheckRequired() {
-        events.add(new WithdrawalCheckRequired(requestId));
+    public void checkingKrwWithdrawalRequired(Count count) {
+        events.add(new CheckingKrwWithdrawalRequired(requestId, count));
     }
 
-    public void markWithdrawalCheckWithDelayRequired() {
-        events.add(new WithdrawalCheckWithDelayRequired(requestId));
+    public void delayingKrwWithdrawalCheckRequired(Count count) {
+        events.add(new DelayingKrwWithdrawalCheckRequired(requestId, count));
     }
 
-    public void markWithdrawalCheckWithDelayRequired(Count count) {
-        events.add(new WithdrawalCheckWithDelayRequired(requestId, count));
+    public void cancelingKrwWithdrawalRequired() {
+        events.add(new CancelingKrwWithdrawalRequired(exchangeId));
     }
 
-    public void markWithdrawalCompensationRequired() {
-        events.add(new WithdrawalCompensationRequired(requestId));
+    public void krwWithdrawalCompleted() {
+        events.add(new KrwWithdrawalCompleted(requestId));
+    }
+    
+    /*
+        외화 입금 관련 이벤트 생성
+     */
+    public void checkingFxDepositRequired(Count count) {
+        events.add(new CheckingFxDepositRequired(requestId, count));
     }
 
-    public void markWithdrawalCompleted() {
-        events.add(new WithdrawalCompleted(requestId));
-    }
-
-    public void markWithdrawalFailed() {
-        events.add(new WithdrawalFailed());
+    public void delayingFxDepositCheckRequired(Count count) {
+        events.add(new DelayingFxDepositCheckRequired(requestId, count));
     }
 
     /*
-        입금 관련 이벤트 생성
+        환전(외화 판매) 관련 이벤트 생성
      */
-    public void markDepositCheckRequired() {
-        events.add(new DepositCheckRequired(requestId));
+    public void sellingStarted() {
+        events.add(new SellingStarted(requestId));
     }
 
-    public void markDepositCheckWithDelayRequired() {
-        events.add(new DepositCheckWithDelayRequired(requestId));
+    public void sellingFailed() {
+        events.add(new SellingFailed(requestId));
     }
 
-    public void markDepositCheckWithDelayRequired(Count count) {
-        events.add(new DepositCheckWithDelayRequired(requestId, count));
+    public void sellingCompleted() {
+        events.add(new SellingCompleted(requestId));
     }
 
-    public void markDepositCompensationRequired() {
-        events.add(new DepositCompensationRequired(requestId));
+    /*
+        외화 출금 관련 이벤트 생성
+     */
+    public void checkingFxWithdrawalRequired(Count count) {
+        events.add(new CheckingFxWithdrawalRequired(requestId, count));
     }
 
-    public void markDepositCompleted() {
-        events.add(new DepositCompleted(requestId));
+    public void delayingFxWithdrawalCheckRequired(Count count) {
+        events.add(new DelayingFxWithdrawalCheckRequired(requestId, count));
     }
 
-    public void markDepositFailed() {
-        events.add(new DepositFailed(requestId));
+    public void cancelingFxWithdrawalRequired() {
+        events.add(new CancelingFxWithdrawalRequired(exchangeId));
+    }
+
+    public void fxWithdrawalCompleted() {
+        events.add(new FxWithdrawalCompleted(requestId));
+    }
+
+    /*
+        원화 입금 관련 이벤트 생성
+     */
+    public void checkingKrwDepositRequired(Count count) {
+        events.add(new CheckingKrwDepositRequired(requestId, count));
+    }
+
+    public void delayingKrwDepositCheckRequired(Count count) {
+        events.add(new DelayingKrwDepositCheckRequired(requestId, count));
     }
 }
