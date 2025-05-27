@@ -1,8 +1,8 @@
 package com.boldfaced7.fxexchange.exchange.application.service.sell;
 
 import com.boldfaced7.fxexchange.common.UseCase;
-import com.boldfaced7.fxexchange.exchange.application.port.in.SellForeignCurrencyCommand;
-import com.boldfaced7.fxexchange.exchange.application.port.in.SellForeignCurrencyUseCase;
+import com.boldfaced7.fxexchange.exchange.application.port.in.sell.SellForeignCurrencyCommand;
+import com.boldfaced7.fxexchange.exchange.application.port.in.sell.SellForeignCurrencyUseCase;
 import com.boldfaced7.fxexchange.exchange.application.port.out.SaveExchangeRequestPort;
 import com.boldfaced7.fxexchange.exchange.application.saga.SellForeignCurrencySagaOrchestrator;
 import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher;
@@ -22,7 +22,7 @@ public class SellForeignCurrencyService implements SellForeignCurrencyUseCase {
     public ExchangeDetail sellForeignCurrency(SellForeignCurrencyCommand command) {
         var saved = saveExchangeRequestPort.save(toModel(command));
 
-        saved.markExchangeStarted();
+        saved.sellingStarted();
         exchangeEventPublisher.publishEvents(saved);
 
         return sellForeignCurrencySagaOrchestrator.startExchange(saved);

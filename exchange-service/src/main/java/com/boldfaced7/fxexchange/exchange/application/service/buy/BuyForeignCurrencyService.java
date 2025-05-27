@@ -1,8 +1,8 @@
 package com.boldfaced7.fxexchange.exchange.application.service.buy;
 
 import com.boldfaced7.fxexchange.common.UseCase;
-import com.boldfaced7.fxexchange.exchange.application.port.in.BuyForeignCurrencyCommand;
-import com.boldfaced7.fxexchange.exchange.application.port.in.BuyForeignCurrencyUseCase;
+import com.boldfaced7.fxexchange.exchange.application.port.in.buy.BuyForeignCurrencyCommand;
+import com.boldfaced7.fxexchange.exchange.application.port.in.buy.BuyForeignCurrencyUseCase;
 import com.boldfaced7.fxexchange.exchange.application.port.out.SaveExchangeRequestPort;
 import com.boldfaced7.fxexchange.exchange.application.saga.BuyForeignCurrencySagaOrchestrator;
 import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher;
@@ -21,8 +21,7 @@ public class BuyForeignCurrencyService implements BuyForeignCurrencyUseCase {
     @Override
     public ExchangeDetail buyForeignCurrency(BuyForeignCurrencyCommand command) {
         var saved = saveExchangeRequestPort.save(toModel(command));
-
-        saved.markExchangeStarted();
+        saved.buyingStarted();
         exchangeEventPublisher.publishEvents(saved);
 
         return buyForeignCurrencySagaOrchestrator.startExchange(saved);
