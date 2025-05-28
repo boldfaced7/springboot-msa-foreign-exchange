@@ -1,6 +1,7 @@
 package com.boldfaced7.fxexchange.exchange.domain.model;
 
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
+import com.boldfaced7.fxexchange.exchange.domain.event.DomainEvent;
 import com.boldfaced7.fxexchange.exchange.domain.event.buy.*;
 import com.boldfaced7.fxexchange.exchange.domain.event.sell.*;
 import com.boldfaced7.fxexchange.exchange.domain.vo.*;
@@ -35,7 +36,7 @@ public class ExchangeRequest {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private final List<Object> events = new ArrayList<>();
+    private final List<DomainEvent> events = new ArrayList<>();
 
     public static ExchangeRequest of(
         ExchangeId exchangeId,
@@ -99,7 +100,7 @@ public class ExchangeRequest {
         );
     }
 
-    public List<Object> pullEvents() {
+    public List<DomainEvent> pullEvents() {
         var pulled = List.copyOf(events);
         events.clear();
         return pulled;
@@ -148,7 +149,7 @@ public class ExchangeRequest {
     }
 
     public void cancelingKrwWithdrawalRequired() {
-        events.add(new CancelingKrwWithdrawalRequired(exchangeId));
+        events.add(new CancelingKrwWithdrawalRequired(requestId, exchangeId));
     }
 
     public void krwWithdrawalCompleted() {
@@ -193,7 +194,7 @@ public class ExchangeRequest {
     }
 
     public void cancelingFxWithdrawalRequired() {
-        events.add(new CancelingFxWithdrawalRequired(exchangeId));
+        events.add(new CancelingFxWithdrawalRequired(requestId, exchangeId));
     }
 
     public void fxWithdrawalCompleted() {

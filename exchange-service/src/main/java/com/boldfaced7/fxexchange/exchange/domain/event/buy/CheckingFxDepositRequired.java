@@ -1,5 +1,6 @@
 package com.boldfaced7.fxexchange.exchange.domain.event.buy;
 
+import com.boldfaced7.fxexchange.exchange.domain.event.LoggedDomainEvent;
 import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
 import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
 
@@ -9,7 +10,7 @@ public record CheckingFxDepositRequired(
         RequestId requestId,
         Count count,
         LocalDateTime raisedAt
-) {
+) implements LoggedDomainEvent {
     public CheckingFxDepositRequired(RequestId requestId) {
         this(requestId, Count.zero(), LocalDateTime.now());
     }
