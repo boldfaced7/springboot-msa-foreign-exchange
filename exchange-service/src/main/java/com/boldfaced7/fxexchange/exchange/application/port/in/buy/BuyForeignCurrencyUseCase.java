@@ -1,7 +1,0 @@
-package com.boldfaced7.fxexchange.exchange.application.port.in.buy;
-
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeDetail;
-
-public interface BuyForeignCurrencyUseCase {
-    ExchangeDetail buyForeignCurrency(BuyForeignCurrencyCommand command);
-}

@@ -1,10 +1,10 @@
-package com.boldfaced7.fxexchange.exchange.application.port.in.buy;
+package com.boldfaced7.fxexchange.exchange.application.port.in;
 
 import com.boldfaced7.fxexchange.exchange.domain.enums.CurrencyCode;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.vo.*;
 
-public record BuyForeignCurrencyCommand(
+public record ExchangeCurrencyCommand(
         ExchangeId exchangeId,
         UserId userId,
         BaseCurrency baseCurrency,
@@ -15,20 +15,21 @@ public record BuyForeignCurrencyCommand(
         ExchangeRate exchangeRate
 ) {
 
-        public BuyForeignCurrencyCommand(
+        public ExchangeCurrencyCommand(
                 UserId userId,
-                QuoteCurrency quoteCurrency,
+                BaseCurrency baseCurrency,
                 BaseAmount baseAmount,
                 QuoteAmount quoteAmount,
+                Direction direction,
                 ExchangeRate exchangeRate
         ) {
                 this(
                         new ExchangeId(),
-                        userId, 
-                        new BaseCurrency(CurrencyCode.KRW), 
-                        quoteCurrency, 
-                        Direction.BUY, 
-                        baseAmount, 
+                        userId,
+                        baseCurrency,
+                        new QuoteCurrency(CurrencyCode.KRW),
+                        direction,
+                        baseAmount,
                         quoteAmount, 
                         exchangeRate
                 );
