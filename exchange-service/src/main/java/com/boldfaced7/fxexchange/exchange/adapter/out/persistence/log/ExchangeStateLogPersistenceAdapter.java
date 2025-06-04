@@ -1,11 +1,12 @@
 package com.boldfaced7.fxexchange.exchange.adapter.out.persistence.log;
 
-import com.boldfaced7.fxexchange.exchange.application.port.out.log.SaveExchangeStateLogPort;
+import com.boldfaced7.fxexchange.exchange.application.port.out.SaveExchangeStateLogPort;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeStateLog;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+@Profile("!test")
 @Component
 @RequiredArgsConstructor
 public class ExchangeStateLogPersistenceAdapter implements SaveExchangeStateLogPort {
