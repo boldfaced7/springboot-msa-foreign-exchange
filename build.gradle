@@ -48,6 +48,9 @@ subprojects {
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testImplementation 'org.springframework.kafka:spring-kafka-test'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+        testCompileOnly 'org.projectlombok:lombok'
+        testRuntimeOnly 'com.h2database:h2'
+        testAnnotationProcessor 'org.projectlombok:lombok'
     }
 
     tasks.named('test') {
