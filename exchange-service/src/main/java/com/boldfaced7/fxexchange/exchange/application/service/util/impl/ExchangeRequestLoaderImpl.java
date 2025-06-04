@@ -1,6 +1,7 @@
-package com.boldfaced7.fxexchange.exchange.application.service.util;
+package com.boldfaced7.fxexchange.exchange.application.service.util.impl;
 
 import com.boldfaced7.fxexchange.exchange.application.port.out.LoadExchangeRequestPort;
+import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeRequestLoader;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
