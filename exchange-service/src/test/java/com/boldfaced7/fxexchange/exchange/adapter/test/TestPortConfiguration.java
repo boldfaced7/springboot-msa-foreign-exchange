@@ -67,7 +67,7 @@ public class TestPortConfiguration {
     }
 
     @Bean
-    public UndoWithdrawalPortForTest undoWithdrawalPortForTest() {
-        return new UndoWithdrawalPortForTest();
+    public CancelWithdrawalPortForTest undoWithdrawalPortForTest() {
+        return new CancelWithdrawalPortForTest();
     }
 }

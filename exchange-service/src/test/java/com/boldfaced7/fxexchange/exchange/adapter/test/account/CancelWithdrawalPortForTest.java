@@ -1,7 +1,7 @@
 package com.boldfaced7.fxexchange.exchange.adapter.test.account;
 
 import com.boldfaced7.fxexchange.exchange.adapter.test.TestUtil;
-import com.boldfaced7.fxexchange.exchange.application.port.out.UndoWithdrawalPort;
+import com.boldfaced7.fxexchange.exchange.application.port.out.CancelWithdrawalPort;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Profile("test")
-public class UndoWithdrawalPortForTest implements UndoWithdrawalPort {
+public class CancelWithdrawalPortForTest implements CancelWithdrawalPort {
     private final Map<ExchangeId, TestBehavior> behaviors = new ConcurrentHashMap<>();
     private final Map<ExchangeId, Runnable> callbacks = new ConcurrentHashMap<>();
 
@@ -22,7 +22,7 @@ public class UndoWithdrawalPortForTest implements UndoWithdrawalPort {
     }
     
     @Override
-    public void undoWithdrawal(ExchangeId exchangeId) {
+    public void cancelWithdrawal(ExchangeId exchangeId) {
         TestBehavior behavior = behaviors.getOrDefault(exchangeId, TestBehavior.NORMAL);
         Runnable callback = callbacks.get(exchangeId);
 

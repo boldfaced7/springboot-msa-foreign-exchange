@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -17,11 +16,11 @@ public class DelayDepositCheckServiceImpl implements DelayDepositCheckService {
 
     private final static Duration DELAY_SECOND = Duration.ofSeconds(30);
 
-    private final Map<Direction, SendDepositCheckRequestPort> sendDepositCheckRequestPorts;
+    private final SendDepositCheckRequestPort sendDepositCheckRequestPort;
 
     @Override
     public void delayDepositCheck(ExchangeId exchangeId, Count count, Direction direction) {
         Duration delay = DELAY_SECOND.multipliedBy(count.value() + 1);
-        sendDepositCheckRequestPorts.get(direction).sendDepositCheckRequest(exchangeId, delay);
+        sendDepositCheckRequestPort.sendDepositCheckRequest(exchangeId, delay, count, direction);
     }
 }

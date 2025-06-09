@@ -3,6 +3,7 @@ package com.boldfaced7.fxexchange.exchange.adapter.test.account;
 import com.boldfaced7.fxexchange.exchange.adapter.test.TestUtil;
 import com.boldfaced7.fxexchange.exchange.application.port.out.SendWithdrawalCheckRequestPort;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
+import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -26,8 +27,8 @@ public class SendWithdrawalCheckRequestPortForTest implements SendWithdrawalChec
     }
     
     @Override
-    public void sendWithdrawalCheckRequest(ExchangeId exchangeId, Duration delay) {
-        int count = callCounts.merge(exchangeId, 1, Integer::sum) - 1; // 0-based
+    public void sendWithdrawalCheckRequest(ExchangeId exchangeId, Duration delay, Count count, Direction direction) {
+        int callCount = callCounts.merge(exchangeId, 1, Integer::sum) - 1; // 0-based
         List<TestBehavior> behaviorList = behaviors.get(exchangeId);
         List<Runnable> callbackList = callbacks.get(exchangeId);
 
@@ -35,14 +36,14 @@ public class SendWithdrawalCheckRequestPortForTest implements SendWithdrawalChec
         Runnable callback = null;
 
         if (behaviorList != null && !behaviorList.isEmpty()) {
-            behavior = (count < behaviorList.size())
-                    ? behaviorList.get(count)
+            behavior = (callCount < behaviorList.size())
+                    ? behaviorList.get(callCount)
                     : behaviorList.getLast();
         }
 
         if (callbackList != null && !callbackList.isEmpty()) {
-            callback = (count < callbackList.size())
-                    ? callbackList.get(count)
+            callback = (callCount < callbackList.size())
+                    ? callbackList.get(callCount)
                     : callbackList.getLast();
         }
 
@@ -87,10 +88,4 @@ public class SendWithdrawalCheckRequestPortForTest implements SendWithdrawalChec
         setBehavior(exchangeId, TestBehavior.DELAY);
         setCallback(exchangeId, callback);
     }
-
-    @Override
-    public Direction direction() {
-        return Direction.BUY;
-    }
-
 }

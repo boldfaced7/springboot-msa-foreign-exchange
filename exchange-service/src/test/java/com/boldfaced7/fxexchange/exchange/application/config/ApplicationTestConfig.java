@@ -70,9 +70,9 @@ public class ApplicationTestConfig {
 
     // UndoWithdrawalPort
     @Bean
-    public Map<Direction, UndoWithdrawalPort> undoWithdrawalPortMap(
-            UndoWithdrawalPort undoWithdrawalPort
+    public Map<Direction, CancelWithdrawalPort> undoWithdrawalPortMap(
+            CancelWithdrawalPort cancelWithdrawalPort
     ) {
-        return toDirectionMap(undoWithdrawalPort);
+        return toDirectionMap(cancelWithdrawalPort);
     }
 }

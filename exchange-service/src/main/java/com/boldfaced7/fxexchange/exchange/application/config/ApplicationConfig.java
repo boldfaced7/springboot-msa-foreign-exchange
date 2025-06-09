@@ -59,35 +59,13 @@ public class ApplicationConfig {
         ));
     }
 
-    // SendDepositCheckRequestPort
-    @Bean
-    public Map<Direction, SendDepositCheckRequestPort> sendDepositCheckRequestPortMap(
-            List<SendDepositCheckRequestPort> rawList
-    ) {
-        return rawList.stream().collect(Collectors.toMap(
-                SendDepositCheckRequestPort::direction,
-                Function.identity()
-        ));
-    }
-
-    // SendWithdrawalCheckRequestPort
-    @Bean
-    public Map<Direction, SendWithdrawalCheckRequestPort> sendWithdrawalCheckRequestPortMap(
-            List<SendWithdrawalCheckRequestPort> rawList
-    ) {
-        return rawList.stream().collect(Collectors.toMap(
-                SendWithdrawalCheckRequestPort::direction,
-                Function.identity()
-        ));
-    }
-
     // UndoWithdrawalPort
     @Bean
-    public Map<Direction, UndoWithdrawalPort> undoWithdrawalPortMap(
-            List<UndoWithdrawalPort> rawList
+    public Map<Direction, CancelWithdrawalPort> undoWithdrawalPortMap(
+            List<CancelWithdrawalPort> rawList
     ) {
         return rawList.stream().collect(Collectors.toMap(
-                UndoWithdrawalPort::direction,
+                CancelWithdrawalPort::direction,
                 Function.identity()
         ));
     }

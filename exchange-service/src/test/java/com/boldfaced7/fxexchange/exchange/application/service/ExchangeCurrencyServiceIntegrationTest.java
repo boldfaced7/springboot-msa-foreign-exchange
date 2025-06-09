@@ -66,7 +66,7 @@ class ExchangeCurrencyServiceIntegrationTest {
     private SendWithdrawalCheckRequestPortForTest sendWithdrawalCheckRequestPortForTest;
 
     @Autowired
-    private UndoWithdrawalPortForTest undoWithdrawalPortForTest;
+    private CancelWithdrawalPortForTest undoWithdrawalPortForTest;
 
     @Autowired
     private CheckDepositWithDelayService checkDepositWithDelayService;

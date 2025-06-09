@@ -14,21 +14,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
-import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DelayWithdrawalCheckServiceImplTest {
 
     @InjectMocks
     private DelayWithdrawalCheckServiceImpl delayWithdrawalCheckService;
-
-    @Mock
-    private Map<Direction, SendWithdrawalCheckRequestPort> sendWithdrawalCheckPorts;
 
     @Mock
     private SendWithdrawalCheckRequestPort sendWithdrawalCheckPort;
@@ -38,9 +33,6 @@ class DelayWithdrawalCheckServiceImplTest {
     @BeforeEach
     void setUp() {
         exchangeId = new ExchangeId("exchangeId");
-
-        // 출금 결과 조회 지연 포트 설정
-        when(sendWithdrawalCheckPorts.get(Direction.BUY)).thenReturn(sendWithdrawalCheckPort);
     }
 
     @Test
@@ -55,8 +47,10 @@ class DelayWithdrawalCheckServiceImplTest {
 
         // then
         verify(sendWithdrawalCheckPort).sendWithdrawalCheckRequest(
-            eq(exchangeId),
-            argThat(duration -> duration.equals(expectedDelay))
+                eq(exchangeId),
+                argThat(duration -> duration.equals(expectedDelay)),
+                eq(count),
+                eq(Direction.BUY)
         );
     }
 
@@ -72,8 +66,10 @@ class DelayWithdrawalCheckServiceImplTest {
 
         // then
         verify(sendWithdrawalCheckPort).sendWithdrawalCheckRequest(
-            eq(exchangeId),
-            argThat(duration -> duration.equals(expectedDelay))
+                eq(exchangeId),
+                argThat(duration -> duration.equals(expectedDelay)),
+                eq(count),
+                eq(Direction.BUY)
         );
     }
 } 

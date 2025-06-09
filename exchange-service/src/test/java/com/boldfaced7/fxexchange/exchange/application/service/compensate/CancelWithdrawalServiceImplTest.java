@@ -1,6 +1,6 @@
 package com.boldfaced7.fxexchange.exchange.application.service.compensate;
 
-import com.boldfaced7.fxexchange.exchange.application.port.out.UndoWithdrawalPort;
+import com.boldfaced7.fxexchange.exchange.application.port.out.CancelWithdrawalPort;
 import com.boldfaced7.fxexchange.exchange.application.service.compensate.impl.CancelWithdrawalServiceImpl;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
@@ -23,10 +23,10 @@ class CancelWithdrawalServiceImplTest {
     private CancelWithdrawalServiceImpl cancelWithdrawalService;
 
     @Mock
-    private Map<Direction, UndoWithdrawalPort> undoWithdrawalPorts;
+    private Map<Direction, CancelWithdrawalPort> undoWithdrawalPorts;
 
     @Mock
-    private UndoWithdrawalPort undoWithdrawalPort;
+    private CancelWithdrawalPort cancelWithdrawalPort;
 
     private ExchangeId exchangeId;
 
@@ -39,14 +39,14 @@ class CancelWithdrawalServiceImplTest {
     @DisplayName("출금 취소 요청을 전송해야 한다.")
     void cancelWithdrawal_Success() {
         // given
-        doNothing().when(undoWithdrawalPort).undoWithdrawal(exchangeId);
-        when(undoWithdrawalPorts.get(Direction.BUY)).thenReturn(undoWithdrawalPort);
+        doNothing().when(cancelWithdrawalPort).cancelWithdrawal(exchangeId);
+        when(undoWithdrawalPorts.get(Direction.BUY)).thenReturn(cancelWithdrawalPort);
 
         // when
         cancelWithdrawalService.cancelWithdrawal(exchangeId, Direction.BUY);
 
         // then
         verify(undoWithdrawalPorts).get(Direction.BUY);
-        verify(undoWithdrawalPort).undoWithdrawal(exchangeId);
+        verify(cancelWithdrawalPort).cancelWithdrawal(exchangeId);
     }
 } 

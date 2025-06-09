@@ -14,21 +14,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
-import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DelayDepositCheckServiceImplTest {
 
     @InjectMocks
     private DelayDepositCheckServiceImpl delayDepositCheckService;
-
-    @Mock
-    private Map<Direction, SendDepositCheckRequestPort> sendDepositCheckPorts;
 
     @Mock
     private SendDepositCheckRequestPort sendDepositCheckPort;
@@ -38,10 +33,6 @@ class DelayDepositCheckServiceImplTest {
     @BeforeEach
     void setUp() {
         exchangeId = new ExchangeId("exchangeId");
-
-        // 입금 결과 조회 지연 포트 설정
-        when(sendDepositCheckPorts.get(Direction.BUY)).thenReturn(sendDepositCheckPort);
-
     }
 
     @Test
@@ -57,7 +48,9 @@ class DelayDepositCheckServiceImplTest {
         // then
         verify(sendDepositCheckPort).sendDepositCheckRequest(
                 eq(exchangeId),
-                argThat(duration -> duration.equals(expectedDelay))
+                argThat(duration -> duration.equals(expectedDelay)),
+                eq(count),
+                eq(Direction.BUY)
         );
     }
 
@@ -74,7 +67,9 @@ class DelayDepositCheckServiceImplTest {
         // then
         verify(sendDepositCheckPort).sendDepositCheckRequest(
                 eq(exchangeId),
-                argThat(duration -> duration.equals(expectedDelay))
+                argThat(duration -> duration.equals(expectedDelay)),
+                eq(count),
+                eq(Direction.BUY)
         );
     }
 } 

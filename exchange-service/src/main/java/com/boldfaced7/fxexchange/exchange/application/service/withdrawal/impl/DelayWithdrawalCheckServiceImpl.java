@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -17,11 +16,11 @@ public class DelayWithdrawalCheckServiceImpl implements DelayWithdrawalCheckServ
 
     private final static Duration DELAY_SECOND = Duration.ofSeconds(30);
 
-    private final Map<Direction, SendWithdrawalCheckRequestPort> sendWithdrawalCheckRequestPorts;
+    private final SendWithdrawalCheckRequestPort sendWithdrawalCheckRequestPort;
 
     @Override
     public void delayWithdrawalCheck(ExchangeId exchangeId, Count count, Direction direction) {
         Duration delay = DELAY_SECOND.multipliedBy(count.value() + 1);
-        sendWithdrawalCheckRequestPorts.get(direction).sendWithdrawalCheckRequest(exchangeId, delay);
+        sendWithdrawalCheckRequestPort.sendWithdrawalCheckRequest(exchangeId, delay, count, direction);
     }
 }

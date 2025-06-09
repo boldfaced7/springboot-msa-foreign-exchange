@@ -1,6 +1,6 @@
 package com.boldfaced7.fxexchange.exchange.application.service.compensate.impl;
 
-import com.boldfaced7.fxexchange.exchange.application.port.out.UndoWithdrawalPort;
+import com.boldfaced7.fxexchange.exchange.application.port.out.CancelWithdrawalPort;
 import com.boldfaced7.fxexchange.exchange.application.service.compensate.CancelWithdrawalService;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
@@ -13,10 +13,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CancelWithdrawalServiceImpl implements CancelWithdrawalService {
 
-    private final Map<Direction, UndoWithdrawalPort> undoWithdrawalPorts;
+    private final Map<Direction, CancelWithdrawalPort> undoWithdrawalPorts;
 
     @Override
     public void cancelWithdrawal(ExchangeId exchangeId, Direction direction) {
-        undoWithdrawalPorts.get(direction).undoWithdrawal(exchangeId);
+        undoWithdrawalPorts.get(direction).cancelWithdrawal(exchangeId);
     }
 }
