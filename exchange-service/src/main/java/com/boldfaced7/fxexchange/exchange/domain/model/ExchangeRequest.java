@@ -1,18 +1,28 @@
 package com.boldfaced7.fxexchange.exchange.domain.model;
 
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
+import com.boldfaced7.fxexchange.exchange.domain.event.DomainEvent;
+import com.boldfaced7.fxexchange.exchange.domain.event.deposit.*;
+import com.boldfaced7.fxexchange.exchange.domain.event.request.ExchangeCurrencyFailed;
+import com.boldfaced7.fxexchange.exchange.domain.event.request.ExchangeCurrencyStarted;
+import com.boldfaced7.fxexchange.exchange.domain.event.request.ExchangeCurrencySucceeded;
+import com.boldfaced7.fxexchange.exchange.domain.event.request.SendingWarningMessageRequired;
+import com.boldfaced7.fxexchange.exchange.domain.event.withdrawal.*;
 import com.boldfaced7.fxexchange.exchange.domain.vo.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
+@ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ExchangeRequest {
-
-    private ExchangeRequestId id;
+    private RequestId requestId;
     private ExchangeId exchangeId;  // 외부 추적 가능한 고유 ID
     private UserId userId;
     
@@ -24,11 +34,15 @@ public class ExchangeRequest {
     private QuoteAmount quoteAmount;   // 환전 후 통화 금액
     private ExchangeRate exchangeRate;  // 적용된 환율
     
-    private WithdrawId withdrawId;      // 출금 트랜잭션 ID
+    private WithdrawalId withdrawalId;      // 출금 트랜잭션 ID
     private DepositId depositId;       // 입금 트랜잭션 ID
+    private WithdrawalCancelId withdrawalCancelId; // 출금 취소 트랜잭션 ID
     
+    private Finished finished;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private final List<DomainEvent> events = new ArrayList<>();
 
     public static ExchangeRequest of(
         ExchangeId exchangeId,
@@ -42,38 +56,6 @@ public class ExchangeRequest {
     ) {
         return new ExchangeRequest(
                 null,
-                exchangeId, 
-                userId, 
-                direction, 
-                baseCurrency, 
-                quoteCurrency, 
-                baseAmount, 
-                quoteAmount, 
-                exchangeRate, 
-                null, 
-                null, 
-                LocalDateTime.now(), 
-                LocalDateTime.now()
-        );
-    }
-
-    public static ExchangeRequest of(
-        ExchangeRequestId id,
-        ExchangeId exchangeId,
-        UserId userId,
-        Direction direction,
-        BaseCurrency baseCurrency,
-        QuoteCurrency quoteCurrency,
-        BaseAmount baseAmount,
-        QuoteAmount quoteAmount,
-        ExchangeRate exchangeRate,
-        WithdrawId withdrawId,
-        DepositId depositId,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
-    ) {
-        return new ExchangeRequest(
-                id,
                 exchangeId,
                 userId,
                 direction,
@@ -82,26 +64,154 @@ public class ExchangeRequest {
                 baseAmount,
                 quoteAmount,
                 exchangeRate,
-                withdrawId,
+                null,
+                null,
+                null,
+                new Finished(false),
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+    }
+
+    public static ExchangeRequest of(
+        RequestId requestId,
+        ExchangeId exchangeId,
+        UserId userId,
+        Direction direction,
+        BaseCurrency baseCurrency,
+        QuoteCurrency quoteCurrency,
+        BaseAmount baseAmount,
+        QuoteAmount quoteAmount,
+        ExchangeRate exchangeRate,
+        WithdrawalId withdrawalId,
+        DepositId depositId,
+        WithdrawalCancelId withdrawalCancelId,
+        Finished finished,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
+    ) {
+        return new ExchangeRequest(
+                requestId,
+                exchangeId,
+                userId,
+                direction,
+                baseCurrency,
+                quoteCurrency,
+                baseAmount,
+                quoteAmount,
+                exchangeRate,
+                withdrawalId,
                 depositId,
+                withdrawalCancelId,
+                finished,
                 createdAt,
                 updatedAt
         );
     }
-        
 
-
-
-    public void registerWithdrawId(WithdrawId withdrawId) {
-        this.withdrawId = withdrawId;
+    public List<DomainEvent> pullEvents() {
+        var pulled = List.copyOf(events);
+        events.clear();
+        return pulled;
     }
 
-    public void registerDepositId(DepositId depositId) {
-        if (withdrawId == null) {
-            throw new IllegalStateException("출금 트랜잭션 ID가 없습니다.");
-        }
+    public boolean isFinished() {
+        return finished.value();
+    }
+
+    public void addWithdrawalId(WithdrawalId withdrawalId) {
+        this.withdrawalId = withdrawalId;
+    }
+
+    public void addDepositId(DepositId depositId) {
         this.depositId = depositId;
     }
 
+    public void addWithdrawalCancelId(WithdrawalCancelId withdrawalCancelId) {
+        this.withdrawalCancelId = withdrawalCancelId;
+    }
 
+    public void terminate() {
+        this.finished = new Finished(true);
+    }
+
+    /*
+        환전 관련 이벤트 생성
+     */
+    public void exchangeCurrencyStarted() {
+        events.add(new ExchangeCurrencyStarted(requestId, exchangeId, direction));
+    }
+
+    public void exchangeCurrencySucceeded() {
+        events.add(new ExchangeCurrencySucceeded(requestId, exchangeId, direction));
+    }
+
+    public void exchangeCurrencyFailed() {
+        events.add(new ExchangeCurrencyFailed(requestId, exchangeId, direction));
+    }
+
+    /*
+        출금 관련 이벤트 생성
+     */
+    public void withdrawalSucceeded() {
+        events.add(new WithdrawalSucceeded(requestId, exchangeId, direction));
+    }
+
+    public void withdrawalFailed() {
+        events.add(new WithdrawalFailed(requestId, exchangeId, direction));
+    }
+
+    public void withdrawalResultUnknown(Count count) {
+        events.add(new WithdrawalResultUnknown(requestId, exchangeId, direction, count));
+    }
+
+    public void withdrawalSuccessChecked() {
+        events.add(new WithdrawalSuccessChecked(requestId, exchangeId, direction));
+    }
+
+    public void withdrawalFailureChecked() {
+        events.add(new WithdrawalFailureChecked(requestId, exchangeId, direction));
+    }
+
+    public void withdrawalCancelled() {
+        events.add(new WithdrawalCancelled(requestId, exchangeId, direction));
+    }
+
+    public void delayingWithdrawalCheckRequired(Count count) {
+        events.add(new DelayingWithdrawalCheckRequired(requestId, exchangeId, direction, count));
+    }
+
+    /*
+        입금 관련 이벤트 생성
+     */
+    public void depositSucceeded() {
+        events.add(new DepositSucceeded(requestId, exchangeId, direction));
+    }
+
+    public void depositFailed() {
+        events.add(new DepositFailed(requestId, exchangeId, direction));
+    }
+
+    public void depositResultUnknown(Count count) {
+        events.add(new DepositResultUnknown(requestId, exchangeId, direction, count));
+    }
+
+    public void depositSuccessChecked() {
+        events.add(new DepositSuccessChecked(requestId, exchangeId, direction));
+    }
+
+    public void depositFailureChecked() {
+        events.add(new DepositFailureChecked(requestId, exchangeId, direction));
+    }
+
+    public void delayingDepositCheckRequired(Count count) {
+        events.add(new DelayingDepositCheckRequired(requestId, exchangeId, direction, count));
+    }
+
+    /*
+        경고 메시지 발송 관련 이벤트 생성
+     */
+    public void sendingWarningMessageRequired(Count count) {
+        events.add(new SendingWarningMessageRequired(requestId, exchangeId, direction, count));
+    }
 }
