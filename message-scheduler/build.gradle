@@ -4,6 +4,13 @@ plugins {
 group = 'com.boldfaced7.foreign-exchange.message-scheduler'
 version = '0.0.1-SNAPSHOT'
 
+configurations {
+    all*.exclude group: 'com.mysql', module: 'mysql-connector-j'
+    all*.exclude group: 'io.github.resilience4j', module: 'resilience4j-spring-boot3'
+    all*.exclude group: 'io.github.resilience4j', module: 'resilience4j-reactor'
+    all*.exclude group: 'io.github.resilience4j', module: 'resilience4j-circuitbreaker'
+}
+
 dependencies {
     implementation project(":common")
 
