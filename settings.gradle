@@ -1,6 +1,8 @@
 rootProject.name = 'springboot-msa-foreign-exchange'
 
 include 'common'
+include 'message-scheduler'
+
 include 'exchange-service'
-//include 'krw-account-service'
-//include 'fx-account-service'
+include 'krw-account-service'
+include 'fx-account-service'

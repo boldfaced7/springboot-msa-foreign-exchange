@@ -14,12 +14,8 @@ subprojects {
     apply plugin: 'io.spring.dependency-management'
     sourceCompatibility = JavaVersion.VERSION_21
 
-    gradle.projectsEvaluated {
-        tasks.withType(JavaCompile).tap {
-            configureEach {
-                options.compilerArgs << '-parameters'
-            }
-        }
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs << '-parameters'
     }
 
     configurations {
@@ -28,35 +24,62 @@ subprojects {
         }
     }
 
+    dependencyManagement {
+        imports {
+            mavenBom 'org.testcontainers:testcontainers-bom:1.21.1'
+            mavenBom 'io.github.resilience4j:resilience4j-bom:2.1.0'
+            mavenBom 'org.springdoc:springdoc-openapi-bom:2.8.8'
+        }
+    }
+
     repositories {
         mavenCentral()
     }
 
     dependencies {
-        implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
-
+        // Spring Boot
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
         implementation 'org.springframework.boot:spring-boot-starter-validation'
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.springframework.boot:spring-boot-starter-webflux'
-        implementation 'org.springframework.kafka:spring-kafka'
+
+        // Swagger3
+        implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui'
 
         // Resilience4j
-        implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.1.0'
-        implementation 'io.github.resilience4j:resilience4j-reactor:2.1.0'
-        implementation 'io.github.resilience4j:resilience4j-circuitbreaker:2.1.0'
-        implementation 'io.github.resilience4j:resilience4j-retry:2.1.0'
+        implementation 'io.github.resilience4j:resilience4j-spring-boot3'
+        implementation 'io.github.resilience4j:resilience4j-reactor'
+        implementation 'io.github.resilience4j:resilience4j-circuitbreaker'
 
-        compileOnly 'org.projectlombok:lombok'
-        runtimeOnly 'com.h2database:h2'
-        annotationProcessor 'org.projectlombok:lombok'
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        // MySQL
+        runtimeOnly 'com.mysql:mysql-connector-j'
+        testImplementation 'org.testcontainers:mysql'
+
+        // Kafka
+        implementation 'org.springframework.kafka:spring-kafka'
         testImplementation 'org.springframework.kafka:spring-kafka-test'
-        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+        testImplementation 'org.testcontainers:kafka'
+
+        // Redis
+        implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+        testImplementation 'com.redis:testcontainers-redis:2.2.4'
+
+        // Lombok
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
         testCompileOnly 'org.projectlombok:lombok'
-        testRuntimeOnly 'com.h2database:h2'
         testAnnotationProcessor 'org.projectlombok:lombok'
+
+        // Test
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+        testImplementation 'org.testcontainers:junit-jupiter'
+        testImplementation 'org.testcontainers:testcontainers'
+        testImplementation 'org.testcontainers:jdbc'
+
+        // Awaitilit
+        testImplementation 'org.awaitility:awaitility:4.2.0'
     }
 
     tasks.named('test') {
