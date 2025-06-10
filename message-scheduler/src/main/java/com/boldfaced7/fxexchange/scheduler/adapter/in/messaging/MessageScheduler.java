@@ -3,12 +3,12 @@ package com.boldfaced7.fxexchange.scheduler.adapter.in.messaging;
 import com.boldfaced7.fxexchange.scheduler.application.port.in.ScheduleMessageCommand;
 import com.boldfaced7.fxexchange.scheduler.application.port.in.ScheduleMessageUseCase;
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -19,17 +19,37 @@ public class MessageScheduler {
     private final ScheduleMessageUseCase scheduleMessageUseCase;
 
     @KafkaListener(
-            topics = "${kafka.topic.check}",
+            topics = "${kafka.topic}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
-    public void scheduleMessage(
-            @Header(KafkaHeaders.RECEIVED_TOPIC) String originalTopic,
-            @Header(SCHEDULED_TIME_MILLIS) long scheduledTimeMillis,
-            @Payload String payload,
+    public void scheduleMessages(
+            List<ConsumerRecord<String, String>> records,
             Acknowledgment ack
     ) {
-        var command = new ScheduleMessageCommand(originalTopic, scheduledTimeMillis, payload);
-        scheduleMessageUseCase.scheduleMessage(command);
+        records.forEach(record -> {
+            String scheduledTimeMillis = new String(
+                    record.headers().lastHeader(SCHEDULED_TIME_MILLIS).value()
+            );
+            scheduleMessage(
+                    record.topic(),
+                    scheduledTimeMillis,
+                    record.value()
+            );
+        });
         ack.acknowledge();
     }
+
+    private void scheduleMessage(
+            String originalTopic,
+            String scheduledTimeMillis,
+            String payload
+    ) {
+        var command = new ScheduleMessageCommand(
+                originalTopic,
+                Long.parseLong(scheduledTimeMillis),
+                payload
+        );
+        scheduleMessageUseCase.scheduleMessage(command);
+    }
+
 }
