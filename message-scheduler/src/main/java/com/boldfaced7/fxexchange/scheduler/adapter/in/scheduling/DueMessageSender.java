@@ -1,4 +1,4 @@
-package com.boldfaced7.fxexchange.scheduler.adapter.in.scheduled;
+package com.boldfaced7.fxexchange.scheduler.adapter.in.scheduling;
 
 import com.boldfaced7.fxexchange.scheduler.application.port.in.SendDueMessageCommand;
 import com.boldfaced7.fxexchange.scheduler.application.port.in.SendDueMessageUseCase;

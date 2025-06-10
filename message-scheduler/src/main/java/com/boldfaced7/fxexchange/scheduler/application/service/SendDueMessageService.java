@@ -18,7 +18,9 @@ public class SendDueMessageService implements SendDueMessageUseCase {
 
     public void sendDueScheduledMessages(SendDueMessageCommand command) {
         var messages = loadScheduledMessagePort.loadDueMessages(command.currentTimeMillis());
-        sendScheduledMessagePort.sendScheduledMessages(messages);
-        deleteScheduledMessagePort.deleteAll(messages);
+        if (!messages.isEmpty()) {
+            sendScheduledMessagePort.sendScheduledMessages(messages);
+            deleteScheduledMessagePort.deleteAll(messages);
+        }
     }
 }
