@@ -4,6 +4,7 @@ import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,13 @@ import java.util.Map;
 public class KafkaConfig {
 
     private final KafkaProperties kafkaProperties;
+
+    @Value("${kafka.topic}")
+    private String topic;
+
+    @Value("${kafka.dlt-topic}")
+    private String dltTopic;
+
 
     public KafkaConfig(KafkaProperties kafkaProperties) {
         this.kafkaProperties = kafkaProperties;
@@ -144,7 +152,7 @@ public class KafkaConfig {
      */
     @Bean
     public NewTopic exchangeTopic() {
-        return new NewTopic("exchange-topic", 3, (short) 3);
+        return new NewTopic(topic, 3, (short) 3);
     }
 
     /**
@@ -154,6 +162,6 @@ public class KafkaConfig {
      */
     @Bean
     public NewTopic exchangeDltTopic() {
-        return new NewTopic("exchange-topic.DLT", 3, (short) 3);
+        return new NewTopic(dltTopic, 3, (short) 3);
     }
 }
