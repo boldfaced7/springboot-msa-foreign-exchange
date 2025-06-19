@@ -8,6 +8,7 @@ import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import com.boldfaced7.fxexchange.exchange.domain.vo.WithdrawalId;
 import com.boldfaced7.fxexchange.exchange.domain.vo.WithdrawalResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Profile;
 
 import java.util.ArrayList;
@@ -17,7 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 @Slf4j
-@Profile("test")
+@TestConfiguration
+@Profile("application-test")
 public class LoadWithdrawalResultPortForTest implements LoadWithdrawalResultPort {
     private final Map<ExchangeId, List<WithdrawalResult>> withdrawalResults = new ConcurrentHashMap<>();
     private final Map<ExchangeId, List<TestBehavior>> behaviors = new ConcurrentHashMap<>();
@@ -31,7 +33,7 @@ public class LoadWithdrawalResultPortForTest implements LoadWithdrawalResultPort
     }
     
     @Override
-    public WithdrawalResult loadWithdrawalResult(ExchangeId exchangeId) {
+    public WithdrawalResult loadWithdrawalResult(ExchangeId exchangeId, Direction direction) {
         TestBehavior behavior = getBehavior(exchangeId);
         WithdrawalResult result = getWithdrawalResult(exchangeId);
         Supplier<WithdrawalResult> withdrawalResultSupplier = () -> result;
@@ -126,12 +128,6 @@ public class LoadWithdrawalResultPortForTest implements LoadWithdrawalResultPort
     public void setThrowException(ExchangeId exchangeId) {
         setBehavior(exchangeId, TestBehavior.THROW_EXCEPTION);
         setWithdrawalResult(exchangeId, null);
-    }
-
-
-    @Override
-    public Direction direction() {
-        return Direction.BUY;
     }
 
 }

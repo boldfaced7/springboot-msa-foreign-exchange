@@ -2,13 +2,14 @@ package com.boldfaced7.fxexchange.exchange.adapter.config;
 
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
@@ -18,9 +19,31 @@ import org.springframework.util.backoff.FixedBackOff;
 import java.util.HashMap;
 import java.util.Map;
 
+@Profile("dev")
 @Configuration
 @EnableKafka
 public class KafkaConfig {
+
+    @Value("${kafka.topic.scheduler.scheduler-topic}")
+    private String schedulerTopic;
+
+    @Value("${kafka.topic.exchange.deposit-check-topic}")
+    private String depositCheckTopic;
+
+    @Value("${kafka.topic.exchange.withdrawal-check-topic}")
+    private String withdrawalCheckTopic;
+
+    @Value("${kafka.topic.fx-account.withdrawal-cancel-request-topic}")
+    private String fxWithdrawalCancelRequestTopic;
+
+    @Value("${kafka.topic.krw-account.withdrawal-cancel-request-topic}")
+    private String krwWithdrawalCancelRequestTopic;
+
+    @Value("${kafka.topic.fx-account.withdrawal-cancel-response-topic}")
+    private String fxWithdrawalCancelResponseTopic;
+
+    @Value("${kafka.topic.krw-account.withdrawal-cancel-response-topic}")
+    private String krwWithdrawalCancelResponseTopic;
 
     private final KafkaProperties kafkaProperties;
 
@@ -45,23 +68,7 @@ public class KafkaConfig {
      */
     @Bean
     public ProducerFactory<String, String> producerFactory() {
-        Map<String, Object> configProps = new HashMap<>(kafkaProperties.buildProducerProperties());
-        
-        // 추가 프로듀서 설정
-        // 멱등성 보장 - 중복 메시지 방지
-        configProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
-        // 동시 요청 수 제한 - 네트워크 부하 조절
-        configProps.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 5);
-        // 배치 처리 대기 시간 설정 - 배치 처리 효율성 향상
-        configProps.put(ProducerConfig.LINGER_MS_CONFIG, 5);
-        // 압축 타입 설정 - 네트워크 대역폭 절약
-        configProps.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
-        // 타임아웃 설정 - 네트워크 장애 대응
-        configProps.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
-        // 최대 블록 시간 설정 - 버퍼 가득 찼을 때 대기 시간
-        configProps.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, 60000);
-        
-        return new DefaultKafkaProducerFactory<>(configProps);
+        return new DefaultKafkaProducerFactory<>(kafkaProperties.buildProducerProperties());
     }
 
     /**
@@ -70,25 +77,7 @@ public class KafkaConfig {
      */
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
-        Map<String, Object> configProps = new HashMap<>(kafkaProperties.buildConsumerProperties());
-        
-        // 추가 컨슈머 설정
-        // 수동 커밋 모드 사용 - 메시지 처리 보장
-        configProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-        // 최대 폴링 간격 설정 - 컨슈머 장애 감지
-        configProps.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 300000);
-        // 최대 폴링 레코드 수 제한 - 메모리 사용량 제어
-        configProps.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 500);
-        // 세션 타임아웃 설정 - 컨슈머 장애 감지
-        configProps.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 10000);
-        // 하트비트 간격 설정 - 컨슈머 상태 모니터링
-        configProps.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, 3000);
-        // 그룹 인스턴스 ID 설정 - 컨슈머 그룹 내 유니크한 식별자
-        configProps.put(ConsumerConfig.GROUP_INSTANCE_ID_CONFIG, "exchange-consumer-1");
-        // 오프셋 리셋 정책 설정 - earliest: 처음부터, latest: 최신부터
-        configProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        
-        return new DefaultKafkaConsumerFactory<>(configProps);
+        return new DefaultKafkaConsumerFactory<>(kafkaProperties.buildConsumerProperties());
     }
 
     /**
@@ -100,9 +89,9 @@ public class KafkaConfig {
             ConsumerFactory<String, String> consumerFactory,
             KafkaTemplate<String, String> kafkaTemplate) {
         
-        ConcurrentKafkaListenerContainerFactory<String, String> factory = 
+        ConcurrentKafkaListenerContainerFactory<String, String> factory =
             new ConcurrentKafkaListenerContainerFactory<>();
-        
+
         factory.setConsumerFactory(consumerFactory);
 
         // 수동 커밋 모드 설정 - 메시지 처리 보장
@@ -138,22 +127,60 @@ public class KafkaConfig {
         return new KafkaTemplate<>(producerFactory());
     }
 
-    /**
-     * 기본 토픽 생성
-     * 파티션 수: 3, 복제 팩터: 3
-     */
     @Bean
-    public NewTopic exchangeTopic() {
-        return new NewTopic("exchange-topic", 3, (short) 3);
+    public NewTopic schedulerTopic() {
+        return TopicBuilder.name(schedulerTopic)
+                .partitions(3)
+                .replicas(3)
+                .build();
     }
 
-    /**
-     * Dead Letter Topic 생성
-     * 처리 실패한 메시지를 저장하는 토픽
-     * 실무에서는 실패한 메시지의 재처리나 모니터링에 사용
-     */
     @Bean
-    public NewTopic exchangeDltTopic() {
-        return new NewTopic("exchange-topic.DLT", 3, (short) 3);
+    public NewTopic depositCheckTopic() {
+        return TopicBuilder.name(depositCheckTopic)
+                .partitions(3)
+                .replicas(3)
+                .build();
     }
+
+    @Bean
+    public NewTopic withdrawalCheckTopic() {
+        return TopicBuilder.name(withdrawalCheckTopic)
+                .partitions(3)
+                .replicas(3)
+                .build();
+    }
+
+    @Bean
+    public NewTopic fxWithdrawalCancelRequestTopic() {
+        return TopicBuilder.name(fxWithdrawalCancelRequestTopic)
+                .partitions(3)
+                .replicas(3)
+                .build();
+    }
+
+    @Bean
+    public NewTopic krwWithdrawalCancelRequestTopic() {
+        return TopicBuilder.name(krwWithdrawalCancelRequestTopic)
+                .partitions(3)
+                .replicas(3)
+                .build();
+    }
+
+    @Bean
+    public NewTopic fxWithdrawalCancelResponseTopic() {
+        return TopicBuilder.name(fxWithdrawalCancelResponseTopic)
+                .partitions(3)
+                .replicas(3)
+                .build();
+    }
+
+    @Bean
+    public NewTopic krwWithdrawalCancelResponseTopic() {
+        return TopicBuilder.name(krwWithdrawalCancelResponseTopic)
+                .partitions(3)
+                .replicas(3)
+                .build();
+    }
+
 }

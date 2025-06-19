@@ -1,4 +1,4 @@
-package com.boldfaced7.fxexchange.exchange.domain.event.deposit;
+package com.boldfaced7.fxexchange.exchange.domain.event.withdrawal;
 
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.event.DomainEvent;
@@ -8,14 +8,14 @@ import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
 
 import java.time.LocalDateTime;
 
-public record DelayingDepositCheckRequired(
+public record WithdrawalCheckUnknown(
         Direction direction,
         RequestId requestId,
         ExchangeId exchangeId,
         Count count,
         LocalDateTime raisedAt
 ) implements DomainEvent {
-    public DelayingDepositCheckRequired(RequestId requestId, ExchangeId exchangeId, Direction direction, Count count) {
+    public WithdrawalCheckUnknown(RequestId requestId, ExchangeId exchangeId, Direction direction, Count count) {
         this(direction, requestId, exchangeId, count, LocalDateTime.now());
     }
 }

@@ -5,20 +5,17 @@ import com.boldfaced7.fxexchange.exchange.application.service.deposit.DepositRes
 import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher;
 import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher.ParamEventPublisher;
 import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher.SimpleEventPublisher;
-import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
 import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
 import com.boldfaced7.fxexchange.exchange.domain.vo.DepositResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
 @Component
 @RequiredArgsConstructor
 public class DepositResultCheckerImpl implements DepositResultChecker {
 
-    private final Map<Direction, LoadDepositResultPort> loadDepositResultPorts;
+    private final LoadDepositResultPort loadDepositResultPort;
     private final ExchangeEventPublisher exchangeEventPublisher;
 
     public DepositResult loadDepositResult(
@@ -29,9 +26,10 @@ public class DepositResultCheckerImpl implements DepositResultChecker {
             Count count
     ) {
         try {
-            var deposited = loadDepositResultPorts.get(requested.getDirection())
-                    .loadDepositResult(requested.getExchangeId());
-
+            var deposited = loadDepositResultPort.loadDepositResult(
+                    requested.getExchangeId(),
+                    requested.getDirection()
+            );
             var publisher = (deposited.isSuccess()) ? whenSucceed : whenFailed;
             exchangeEventPublisher.publishEvents(requested, publisher);
 

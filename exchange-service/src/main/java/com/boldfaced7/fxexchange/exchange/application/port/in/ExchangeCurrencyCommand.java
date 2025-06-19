@@ -34,4 +34,26 @@ public record ExchangeCurrencyCommand(
                         exchangeRate
                 );
         }
+
+        public ExchangeCurrencyCommand(
+                ExchangeId exchangeId,
+                UserId userId,
+                BaseCurrency baseCurrency,
+                BaseAmount baseAmount,
+                QuoteAmount quoteAmount,
+                Direction direction,
+                ExchangeRate exchangeRate
+        ) {
+                this(
+                        exchangeId,
+                        userId,
+                        baseCurrency,
+                        new QuoteCurrency(CurrencyCode.KRW),
+                        direction,
+                        baseAmount,
+                        quoteAmount,
+                        exchangeRate
+                );
+        }
+
 }

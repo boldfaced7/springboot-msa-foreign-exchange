@@ -7,10 +7,7 @@ import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEvent
 import com.boldfaced7.fxexchange.exchange.application.service.withdrawal.impl.WithdrawalResultCheckerImpl;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.AccountCommandStatus;
-import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
-import com.boldfaced7.fxexchange.exchange.domain.vo.WithdrawalId;
-import com.boldfaced7.fxexchange.exchange.domain.vo.WithdrawalResult;
+import com.boldfaced7.fxexchange.exchange.domain.vo.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,8 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
@@ -32,9 +27,6 @@ class WithdrawalResultCheckerImplTest {
 
     @InjectMocks
     private WithdrawalResultCheckerImpl withdrawalResultChecker;
-
-    @Mock
-    private Map<Direction, LoadWithdrawalResultPort> loadWithdrawalResultPorts;
 
     @Mock
     private ExchangeEventPublisher exchangeEventPublisher;
@@ -58,7 +50,7 @@ class WithdrawalResultCheckerImplTest {
     @BeforeEach
     void setUp() {
         when(exchangeRequest.getDirection()).thenReturn(Direction.BUY);
-        when(loadWithdrawalResultPorts.get(Direction.BUY)).thenReturn(loadWithdrawalResultPort);
+        when(exchangeRequest.getExchangeId()).thenReturn(new ExchangeId("exchangeId"));
 
         successResult = new WithdrawalResult(true, new AccountCommandStatus("SUCCESS"), new WithdrawalId("withdrawal-123"));
         failureResult = new WithdrawalResult(false, new AccountCommandStatus("FAILED"), new WithdrawalId("withdrawal-456"));
@@ -70,7 +62,10 @@ class WithdrawalResultCheckerImplTest {
     void loadWithdrawalResult_Success() {
         // given
         // 1. 출금 결과 조회 성공 설정
-        when(loadWithdrawalResultPort.loadWithdrawalResult(exchangeRequest.getExchangeId())).thenReturn(successResult);
+        when(loadWithdrawalResultPort.loadWithdrawalResult(
+                exchangeRequest.getExchangeId(),
+                Direction.BUY
+        )).thenReturn(successResult);
 
         // 2. 이벤트 발행 설정
         doNothing().when(exchangeEventPublisher).publishEvents(
@@ -84,7 +79,7 @@ class WithdrawalResultCheckerImplTest {
                 exchangeRequest,
                 ExchangeRequest::withdrawalSucceeded,
                 ExchangeRequest::withdrawalFailed,
-                ExchangeRequest::delayingWithdrawalCheckRequired,
+                ExchangeRequest::withdrawalCheckUnknown,
                 count
         );
 
@@ -93,7 +88,7 @@ class WithdrawalResultCheckerImplTest {
         assertThat(result).isEqualTo(successResult);
 
         // 2. 출금 결과 조회 호출 확인
-        verify(loadWithdrawalResultPort).loadWithdrawalResult(exchangeRequest.getExchangeId());
+        verify(loadWithdrawalResultPort).loadWithdrawalResult(exchangeRequest.getExchangeId(), Direction.BUY);
 
         // 3. 성공 이벤트 발행 확인
         verify(exchangeEventPublisher).publishEvents(
@@ -109,7 +104,10 @@ class WithdrawalResultCheckerImplTest {
     void loadWithdrawalResult_Failure() {
         // given
         // 1. 출금 결과 조회 실패 설정
-        when(loadWithdrawalResultPort.loadWithdrawalResult(exchangeRequest.getExchangeId())).thenReturn(failureResult);
+        when(loadWithdrawalResultPort.loadWithdrawalResult(
+                exchangeRequest.getExchangeId(),
+                Direction.BUY
+        )).thenReturn(failureResult);
 
         // 2. 이벤트 발행 설정
         doNothing().when(exchangeEventPublisher).publishEvents(
@@ -123,7 +121,7 @@ class WithdrawalResultCheckerImplTest {
                 exchangeRequest,
                 ExchangeRequest::withdrawalSucceeded,
                 ExchangeRequest::withdrawalFailed,
-                ExchangeRequest::delayingWithdrawalCheckRequired,
+                ExchangeRequest::withdrawalCheckUnknown,
                 count
         );
 
@@ -132,7 +130,7 @@ class WithdrawalResultCheckerImplTest {
         assertThat(result).isEqualTo(failureResult);
 
         // 2. 출금 결과 조회 호출 확인
-        verify(loadWithdrawalResultPort).loadWithdrawalResult(exchangeRequest.getExchangeId());
+        verify(loadWithdrawalResultPort).loadWithdrawalResult(exchangeRequest.getExchangeId(), Direction.BUY);
 
         // 3. 실패 이벤트 발행 확인
         verify(exchangeEventPublisher).publishEvents(
@@ -145,12 +143,13 @@ class WithdrawalResultCheckerImplTest {
 
     @Test
     @DisplayName("출금 결과 조회 중 예외 발생 시, 예외 이벤트 발행 람다를 전달한다")
-    @SuppressWarnings("unchecked")
     void loadWithdrawalResult_Exception() {
         // given
         // 1. 출금 결과 조회 예외 발생 설정
-        when(loadWithdrawalResultPort.loadWithdrawalResult(exchangeRequest.getExchangeId()))
-                .thenThrow(new RuntimeException("Network error"));
+        when(loadWithdrawalResultPort.loadWithdrawalResult(
+                exchangeRequest.getExchangeId(),
+                Direction.BUY
+        )).thenThrow(new RuntimeException("Network error"));
 
         // 2. 이벤트 발행 설정
         doNothing().when(exchangeEventPublisher).publishEvents(
@@ -158,7 +157,7 @@ class WithdrawalResultCheckerImplTest {
                 any(ParamEventPublisher.class),
                 eq(count)
         );
-        doNothing().when(exchangeRequest).delayingWithdrawalCheckRequired(any(Count.class));
+        doNothing().when(exchangeRequest).withdrawalCheckUnknown(any(Count.class));
 
         // when & then
         // 1. 예외 발생 확인
@@ -166,13 +165,16 @@ class WithdrawalResultCheckerImplTest {
                 exchangeRequest,
                 ExchangeRequest::withdrawalSucceeded,
                 ExchangeRequest::withdrawalFailed,
-                ExchangeRequest::delayingWithdrawalCheckRequired,
+                ExchangeRequest::withdrawalCheckUnknown,
                 count
         )).isInstanceOf(RuntimeException.class)
           .hasMessageContaining("Network error");
 
         // 2. 출금 결과 조회 호출 확인
-        verify(loadWithdrawalResultPort).loadWithdrawalResult(exchangeRequest.getExchangeId());
+        verify(loadWithdrawalResultPort).loadWithdrawalResult(
+                exchangeRequest.getExchangeId(),
+                Direction.BUY
+        );
 
         // 3. 예외 이벤트 발행 확인
         verify(exchangeEventPublisher).publishEvents(
@@ -181,6 +183,6 @@ class WithdrawalResultCheckerImplTest {
                 eq(count)
         );
         paramEventPublisherCaptor.getValue().publish(exchangeRequest, count);
-        verify(exchangeRequest).delayingWithdrawalCheckRequired(count);
+        verify(exchangeRequest).withdrawalCheckUnknown(count);
     }
 } 

@@ -1,0 +1,92 @@
+spring:
+  application:
+    name: exchange-service
+
+  datasource:
+    url: jdbc:h2:mem:test
+    username: user
+    password: sa
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
+      timeout: 10000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1
+
+  kafka:
+    bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+      enable-idempotence: true
+      max-in-flight-requests-per-connection: 5
+      linger-ms: 5
+      compression-type: snappy
+      request-timeout-ms: 30000
+      max-block-ms: 60000
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: exchange-service-group
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+      max-poll-interval-ms: 300000
+      max-poll-records: 500
+      session-timeout-ms: 10000
+      heartbeat-interval-ms: 3000
+
+server:
+  port: 8081
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+
+kafka:
+  topic:
+    exchange:
+      dlt-topic: exchange-topic.DLT
+      deposit-check-topic: exchange-topic.deposit-check
+      withdrawal-check-topic: exchange-topic.withdrawal-check
+    krw-account:
+      withdrawal-cancel-request-topic: krw-account-topic.withdrawal.cancel.request
+      withdrawal-cancel-response-topic: krw-account-topic.withdrawal.cancel.response
+    fx-account:
+      withdrawal-cancel-request-topic: fx-account-topic.withdrawal.cancel
+      withdrawal-cancel-response-topic: krw-account-topic.withdrawal.cancel.response
+    scheduler:
+      scheduler-topic: scheduler-topic
+  header:
+    scheduler:
+      scheduled-time-millis: scheduled-time-millis
+
+external:
+  fx-account:
+    base-url: http://localhost:8082
+  krw-account:
+    base-url: http://localhost:8083
+
+exchange:
+  check:
+    max-count: 3
+

@@ -11,12 +11,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CheckWithdrawalWithDelayService implements CheckWithdrawalWithDelayUseCase {
 
-    private final ExchangeEventPublisher exchangeEventFacilitator;
+    private final ExchangeEventPublisher exchangeEventPublisher;
 
 
     @Override
     public void checkWithdrawalWithDelay(CheckWithdrawalWithDelayCommand command) {
-        exchangeEventFacilitator.publishEvents(
+        exchangeEventPublisher.publishEvents(
                 command.exchangeId(),
                 ExchangeRequest::withdrawalResultUnknown,
                 command.count()

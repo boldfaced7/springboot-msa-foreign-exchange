@@ -12,18 +12,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Map;
-
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class CancelWithdrawalServiceImplTest {
 
     @InjectMocks
     private CancelWithdrawalServiceImpl cancelWithdrawalService;
-
-    @Mock
-    private Map<Direction, CancelWithdrawalPort> undoWithdrawalPorts;
 
     @Mock
     private CancelWithdrawalPort cancelWithdrawalPort;
@@ -39,14 +35,12 @@ class CancelWithdrawalServiceImplTest {
     @DisplayName("출금 취소 요청을 전송해야 한다.")
     void cancelWithdrawal_Success() {
         // given
-        doNothing().when(cancelWithdrawalPort).cancelWithdrawal(exchangeId);
-        when(undoWithdrawalPorts.get(Direction.BUY)).thenReturn(cancelWithdrawalPort);
+        doNothing().when(cancelWithdrawalPort).cancelWithdrawal(exchangeId, Direction.BUY);
 
         // when
         cancelWithdrawalService.cancelWithdrawal(exchangeId, Direction.BUY);
 
         // then
-        verify(undoWithdrawalPorts).get(Direction.BUY);
-        verify(cancelWithdrawalPort).cancelWithdrawal(exchangeId);
+        verify(cancelWithdrawalPort).cancelWithdrawal(exchangeId, Direction.BUY);
     }
 } 

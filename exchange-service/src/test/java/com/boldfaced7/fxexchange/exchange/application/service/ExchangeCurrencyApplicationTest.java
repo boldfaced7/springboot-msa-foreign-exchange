@@ -2,9 +2,8 @@ package com.boldfaced7.fxexchange.exchange.application.service;
 
 import com.boldfaced7.fxexchange.exchange.adapter.test.ExchangeRequestPersistenceAdapterForTest;
 import com.boldfaced7.fxexchange.exchange.adapter.test.ExchangeStateLogPersistenceAdapterForTest;
-import com.boldfaced7.fxexchange.exchange.adapter.test.TestPortConfiguration;
 import com.boldfaced7.fxexchange.exchange.adapter.test.account.*;
-import com.boldfaced7.fxexchange.exchange.application.config.ApplicationTestConfig;
+import com.boldfaced7.fxexchange.exchange.application.config.ApplicationTestPortConfig;
 import com.boldfaced7.fxexchange.exchange.application.port.in.CheckDepositWithDelayCommand;
 import com.boldfaced7.fxexchange.exchange.application.port.in.CheckWithdrawalWithDelayCommand;
 import com.boldfaced7.fxexchange.exchange.application.port.in.CompleteWithdrawalCancelCommand;
@@ -20,7 +19,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -30,56 +28,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-@SpringBootTest
-@Import({
-        TestPortConfiguration.class,
-        ApplicationTestConfig.class
-})
-@ActiveProfiles("test")
-class ExchangeCurrencyServiceIntegrationTest {
+@SpringBootTest(classes = ApplicationTestPortConfig.class)
+@ActiveProfiles("application-test")
+class ExchangeCurrencyApplicationTest {
 
-    @Autowired
-    private ExchangeCurrencyService exchangeCurrencyService;
+    @Autowired ExchangeCurrencyService exchangeCurrencyService;
+    @Autowired CheckDepositWithDelayService checkDepositWithDelayService;
+    @Autowired CheckWithdrawalWithDelayService checkWithdrawalWithDelayService;
+    @Autowired CompleteWithdrawalCancelService completeWithdrawalCancelService;
 
-    @Autowired
-    private ExchangeRequestPersistenceAdapterForTest requestRepository;
+    @Autowired ExchangeRequestPersistenceAdapterForTest exchangeRequestPersistenceAdapter;
+    @Autowired ExchangeStateLogPersistenceAdapterForTest exchangeStateLogPersistenceAdapter;
+    @Autowired RequestDepositPortForTest requestDepositPort;
+    @Autowired RequestWithdrawalPortForTest requestWithdrawalPort;
+    @Autowired LoadDepositResultPortForTest loadDepositResultPort;
+    @Autowired LoadWithdrawalResultPortForTest loadWithdrawalResultPort;
+    @Autowired ScheduleCheckRequestPortForTest scheduleCheckRequestPort;
+    @Autowired CancelWithdrawalPortForTest cancelWithdrawalPort;
 
-    @Autowired
-    private ExchangeStateLogPersistenceAdapterForTest logRepository;
+    ExchangeCurrencyCommand command;
 
-    @Autowired
-    private RequestDepositPortForTest requestDepositPortForTest;
-
-    @Autowired
-    private RequestWithdrawalPortForTest requestWithdrawalPortForTest;
-
-    @Autowired
-    private LoadDepositResultPortForTest loadDepositResultPortForTest;
-
-    @Autowired
-    private LoadWithdrawalResultPortForTest loadWithdrawalResultPortForTest;
-
-    @Autowired
-    private SendDepositCheckRequestPortForTest sendDepositCheckRequestPortForTest;
-
-    @Autowired
-    private SendWithdrawalCheckRequestPortForTest sendWithdrawalCheckRequestPortForTest;
-
-    @Autowired
-    private CancelWithdrawalPortForTest undoWithdrawalPortForTest;
-
-    @Autowired
-    private CheckDepositWithDelayService checkDepositWithDelayService;
-
-    @Autowired
-    private CheckWithdrawalWithDelayService checkWithdrawalWithDelayService;
-
-    @Autowired
-    private CompleteWithdrawalCancelService completeWithdrawalCancelService;
-
-    private ExchangeCurrencyCommand command;
-
-    private final Consumer<Integer> checkDepositWithDelay = count ->
+    Consumer<Integer> checkDepositWithDelay = count ->
             checkDepositWithDelayService.checkDepositWithDelay(
                     new CheckDepositWithDelayCommand(
                             command.exchangeId(),
@@ -88,7 +57,7 @@ class ExchangeCurrencyServiceIntegrationTest {
                     )
             );
 
-    private final Consumer<Integer> checkWithdrawalWithDelay = count ->
+    Consumer<Integer> checkWithdrawalWithDelay = count ->
             checkWithdrawalWithDelayService.checkWithdrawalWithDelay(
                     new CheckWithdrawalWithDelayCommand(
                             command.exchangeId(),
@@ -97,7 +66,7 @@ class ExchangeCurrencyServiceIntegrationTest {
                     )
             );
 
-    private final Runnable completeWithdrawalCancel = () ->
+    Runnable completeWithdrawalCancel = () ->
             completeWithdrawalCancelService.completeWithdrawalCancel(
                     new CompleteWithdrawalCancelCommand(
                             command.exchangeId(),
@@ -118,34 +87,33 @@ class ExchangeCurrencyServiceIntegrationTest {
         );
 
         // 모든 테스트 포트 초기화
-        requestDepositPortForTest.reset();
-        requestWithdrawalPortForTest.reset();
+        requestDepositPort.reset();
+        requestWithdrawalPort.reset();
 
-        loadDepositResultPortForTest.reset();
-        loadWithdrawalResultPortForTest.reset();
+        loadDepositResultPort.reset();
+        loadWithdrawalResultPort.reset();
 
-        sendDepositCheckRequestPortForTest.reset();
-        sendWithdrawalCheckRequestPortForTest.reset();
+        scheduleCheckRequestPort.reset();
 
-        undoWithdrawalPortForTest.reset();
+        cancelWithdrawalPort.reset();
 
-        requestRepository.reset();
-        logRepository.reset();
+        exchangeRequestPersistenceAdapter.reset();
+        exchangeStateLogPersistenceAdapter.reset();
     }
 
     ExchangeRequest getExchangeRequest(RequestId requestId) {
-        return requestRepository.loadByRequestId(requestId);
+        return exchangeRequestPersistenceAdapter.loadByRequestId(requestId);
     }
 
     List<ExchangeState> getExchangeStates(RequestId requestId) {
-        return logRepository.findByRequestId(requestId)
+        return exchangeStateLogPersistenceAdapter.findByRequestId(requestId)
                 .stream()
                 .map(ExchangeStateLog::getState)
                 .toList();
     }
 
     RequestId getRequestId() {
-        return requestRepository.getRequestId();
+        return exchangeRequestPersistenceAdapter.getRequestId();
     }
 
     void sleepForAsync(long millis) {
@@ -163,11 +131,11 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 출금_성공_입금_성공_환전_성공() {
         // Given
         // 1. 출금 성공
-        requestWithdrawalPortForTest.setSuccess(
+        requestWithdrawalPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "withdrawalId");
 
         // 2. 입금 성공
-        requestDepositPortForTest.setSuccess(
+        requestDepositPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "depositId");
 
         // When
@@ -196,14 +164,14 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 입금_성공_확인_후_환전_성공() {
         // Given
         // 1. 출금 성공
-        requestWithdrawalPortForTest.setSuccess(
+        requestWithdrawalPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "withdrawalId");
 
         // 2. 입금 결과 모름
-        requestDepositPortForTest.setThrowException(command.exchangeId());
+        requestDepositPort.setThrowException(command.exchangeId());
 
         // 3. 입금 성공 확인
-        loadDepositResultPortForTest.setSuccess(
+        loadDepositResultPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "depositId");
 
         // When
@@ -237,20 +205,20 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 입금_결과_확인_실패_1회_후_환전_성공() {
         // Given
         // 1. 출금 성공
-        requestWithdrawalPortForTest.setSuccess(
+        requestWithdrawalPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "withdrawalId");
 
         // 2. 입금 결과 모름
-        requestDepositPortForTest.setThrowException(command.exchangeId());
+        requestDepositPort.setThrowException(command.exchangeId());
 
         // 3. 입금 결과 확인 실패 1회
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
 
         // 4. 입금 결과 조회 지연
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(1));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(1));
 
         // 5. 입금 성공 확인
-        loadDepositResultPortForTest.setSuccess(
+        loadDepositResultPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "depositId");
 
         // When
@@ -283,22 +251,22 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 입금_결과_확인_실패_2회_후_환전_성공() {
         // Given
         // 1. 출금 성공
-        requestWithdrawalPortForTest.setSuccess(
+        requestWithdrawalPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "withdrawalId");
 
         // 2. 입금 결과 모름
-        requestDepositPortForTest.setThrowException(command.exchangeId());
+        requestDepositPort.setThrowException(command.exchangeId());
 
         // 3. 입금 결과 확인 실패 2회
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
 
         // 4. 입금 결과 조회 지연 2회
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(1));
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(2));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(1));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(2));
 
         // 5. 입금 성공 확인
-        loadDepositResultPortForTest.setSuccess(
+        loadDepositResultPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "depositId");
 
         // When
@@ -331,24 +299,24 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 입금_결과_확인_실패_3회_후_환전_성공() {
         // Given
         // 1. 출금 성공
-        requestWithdrawalPortForTest.setSuccess(
+        requestWithdrawalPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "withdrawalId");
 
         // 2. 입금 결과 모름
-        requestDepositPortForTest.setThrowException(command.exchangeId());
+        requestDepositPort.setThrowException(command.exchangeId());
 
         // 3. 입금 결과 확인 실패 3회
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
 
         // 4. 입금 결과 조회 지연 3회
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(1));
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(2));
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(3));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(1));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(2));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(3));
 
         // 5. 입금 성공 확인
-        loadDepositResultPortForTest.setSuccess(
+        loadDepositResultPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "depositId");
 
         // When
@@ -382,14 +350,14 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 출금_성공_입금_실패_즉시_환전실패() {
         // Given
         // 1. 출금 성공
-        requestWithdrawalPortForTest.setSuccess(
+        requestWithdrawalPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "withdrawalId");
 
         // 2. 입금 실패
-        requestDepositPortForTest.setFailed(command.exchangeId(), "FAILED");
+        requestDepositPort.setFailed(command.exchangeId(), "FAILED");
 
         // 3. 출금 취소
-        undoWithdrawalPortForTest.setNormal(command.exchangeId(), completeWithdrawalCancel);
+        cancelWithdrawalPort.setNormal(command.exchangeId(), completeWithdrawalCancel);
 
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
@@ -420,17 +388,17 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 입금_실패_확인_후_출금_취소_플로우() {
         // Given
         // 1. 출금 성공
-        requestWithdrawalPortForTest.setSuccess(
+        requestWithdrawalPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "withdrawalId");
 
         // 2. 입금 결과 모름
-        requestDepositPortForTest.setThrowException(command.exchangeId());
+        requestDepositPort.setThrowException(command.exchangeId());
 
         // 3. 입금 실패 확인
-        loadDepositResultPortForTest.setFailed(command.exchangeId(), "FAILED");
+        loadDepositResultPort.setFailed(command.exchangeId(), "FAILED");
 
         // 4. 출금 취소
-        undoWithdrawalPortForTest.setNormal(command.exchangeId(), completeWithdrawalCancel);
+        cancelWithdrawalPort.setNormal(command.exchangeId(), completeWithdrawalCancel);
 
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
@@ -462,23 +430,23 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 입금_결과_확인_실패_1회_후_입금_실패_확인_후_출금_취소_플로우() {
         // Given
         // 1. 출금 성공
-        requestWithdrawalPortForTest.setSuccess(
+        requestWithdrawalPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "withdrawalId");
 
         // 2. 입금 결과 모름
-        requestDepositPortForTest.setThrowException(command.exchangeId());
+        requestDepositPort.setThrowException(command.exchangeId());
 
         // 3. 입금 결과 확인 실패 1회
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
 
         // 4. 입금 결과 조회 지연
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(1));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(1));
 
         // 5. 입금 실패 확인
-        loadDepositResultPortForTest.setFailed(command.exchangeId(), "FAILED");
+        loadDepositResultPort.setFailed(command.exchangeId(), "FAILED");
 
         // 6. 출금 취소
-        undoWithdrawalPortForTest.setNormal(command.exchangeId(), completeWithdrawalCancel);
+        cancelWithdrawalPort.setNormal(command.exchangeId(), completeWithdrawalCancel);
 
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
@@ -510,25 +478,25 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 입금_결과_확인_실패_2회_후_입금_실패_확인_후_출금_취소_플로우() {
         // Given
         // 1. 출금 성공
-        requestWithdrawalPortForTest.setSuccess(
+        requestWithdrawalPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "withdrawalId");
 
         // 2. 입금 결과 모름
-        requestDepositPortForTest.setThrowException(command.exchangeId());
+        requestDepositPort.setThrowException(command.exchangeId());
 
         // 3. 입금 결과 확인 실패 2회
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
 
         // 4. 입금 결과 조회 지연 2회
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(1));
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(2));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(1));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(2));
 
         // 5. 입금 실패 확인
-        loadDepositResultPortForTest.setFailed(command.exchangeId(), "FAILED");
+        loadDepositResultPort.setFailed(command.exchangeId(), "FAILED");
 
         // 6. 출금 취소
-        undoWithdrawalPortForTest.setNormal(command.exchangeId(), completeWithdrawalCancel);
+        cancelWithdrawalPort.setNormal(command.exchangeId(), completeWithdrawalCancel);
 
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
@@ -560,27 +528,27 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 입금_결과_확인_실패_3회_후_입금_실패_확인_후_출금_취소_플로우() {
         // Given
         // 1. 출금 성공
-        requestWithdrawalPortForTest.setSuccess(
+        requestWithdrawalPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "withdrawalId");
 
         // 2. 입금 결과 모름
-        requestDepositPortForTest.setThrowException(command.exchangeId());
+        requestDepositPort.setThrowException(command.exchangeId());
 
         // 3. 입금 결과 확인 실패 3회
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
 
         // 4. 입금 결과 조회 지연 3회
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(1));
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(2));
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(3));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(1));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(2));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(3));
 
         // 5. 입금 실패 확인
-        loadDepositResultPortForTest.setFailed(command.exchangeId(), "FAILED");
+        loadDepositResultPort.setFailed(command.exchangeId(), "FAILED");
 
         // 6. 출금 취소
-        undoWithdrawalPortForTest.setNormal(command.exchangeId(), completeWithdrawalCancel);
+        cancelWithdrawalPort.setNormal(command.exchangeId(), completeWithdrawalCancel);
 
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
@@ -612,14 +580,14 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 출금_성공_확인_후_출금_취소_플로우() {
         // Given
         // 1. 출금 결과 모름
-        requestWithdrawalPortForTest.setThrowException(command.exchangeId());
+        requestWithdrawalPort.setThrowException(command.exchangeId());
 
         // 2. 출금 성공 확인
-        loadWithdrawalResultPortForTest.setSuccess(
+        loadWithdrawalResultPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "withdrawalId");
 
         // 3. 출금 취소
-        undoWithdrawalPortForTest.setNormal(command.exchangeId(), completeWithdrawalCancel);
+        cancelWithdrawalPort.setNormal(command.exchangeId(), completeWithdrawalCancel);
 
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
@@ -650,19 +618,19 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 출금_결과_확인_실패_1회_후_출금_성공_확인_후_출금_취소_플로우() {
         // Given
         // 1. 출금 결과 모름
-        requestWithdrawalPortForTest.setThrowException(command.exchangeId());
+        requestWithdrawalPort.setThrowException(command.exchangeId());
 
         // 2. 출금 결과 확인 실패 1회
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
 
         // 3. 출금 결과 조회 지연
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(1));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(1));
 
         // 4. 출금 성공 확인
-        loadWithdrawalResultPortForTest.setSuccess(command.exchangeId(), "SUCCESS", "withdrawalId");
+        loadWithdrawalResultPort.setSuccess(command.exchangeId(), "SUCCESS", "withdrawalId");
 
         // 5. 출금 취소
-        undoWithdrawalPortForTest.setNormal(command.exchangeId(), completeWithdrawalCancel);
+        cancelWithdrawalPort.setNormal(command.exchangeId(), completeWithdrawalCancel);
 
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
@@ -693,21 +661,21 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 출금_결과_확인_실패_2회_후_출금_성공_확인_후_출금_취소_플로우() {
         // Given
         // 1. 출금 결과 모름
-        requestWithdrawalPortForTest.setThrowException(command.exchangeId());
+        requestWithdrawalPort.setThrowException(command.exchangeId());
 
         // 2. 출금 결과 확인 실패 2회
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
 
         // 3. 출금 결과 조회 지연 2회
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(1));
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(2));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(1));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(2));
 
         // 4. 출금 성공 확인
-        loadWithdrawalResultPortForTest.setSuccess(command.exchangeId(), "SUCCESS", "withdrawalId");
+        loadWithdrawalResultPort.setSuccess(command.exchangeId(), "SUCCESS", "withdrawalId");
 
         // 5. 출금 취소
-        undoWithdrawalPortForTest.setNormal(command.exchangeId(), completeWithdrawalCancel);
+        cancelWithdrawalPort.setNormal(command.exchangeId(), completeWithdrawalCancel);
 
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
@@ -738,23 +706,23 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 출금_결과_확인_실패_3회_후_출금_성공_확인_후_출금_취소_플로우() {
         // Given
         // 1. 출금 결과 모름
-        requestWithdrawalPortForTest.setThrowException(command.exchangeId());
+        requestWithdrawalPort.setThrowException(command.exchangeId());
 
         // 2. 출금 결과 확인 실패 3회
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
 
         // 3. 출금 결과 조회 지연
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(1));
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(2));
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(3));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(1));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(2));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(3));
 
         // 4. 출금 성공 확인
-        loadWithdrawalResultPortForTest.setSuccess(command.exchangeId(), "SUCCESS", "withdrawalId");
+        loadWithdrawalResultPort.setSuccess(command.exchangeId(), "SUCCESS", "withdrawalId");
 
         // 5. 출금 취소
-        undoWithdrawalPortForTest.setNormal(command.exchangeId(), completeWithdrawalCancel);
+        cancelWithdrawalPort.setNormal(command.exchangeId(), completeWithdrawalCancel);
 
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
@@ -786,7 +754,7 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 출금_즉시_실패_플로우() {
         // Given
         // 1. 출금 실패
-        requestWithdrawalPortForTest.setFailed(command.exchangeId(), "FAILED");
+        requestWithdrawalPort.setFailed(command.exchangeId(), "FAILED");
 
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
@@ -815,10 +783,10 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 출금_실패_확인_후_환전_실패() {
         // Given
         // 1. 출금 결과 모름
-        requestWithdrawalPortForTest.setThrowException(command.exchangeId());
+        requestWithdrawalPort.setThrowException(command.exchangeId());
 
         // 2. 출금 실패 확인
-        loadWithdrawalResultPortForTest.setFailed(command.exchangeId(), "FAILED");
+        loadWithdrawalResultPort.setFailed(command.exchangeId(), "FAILED");
 
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
@@ -848,16 +816,16 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 출금_결과_확인_실패_1회_후_출금_실패_확인_후_환전_실패() {
         // Given
         // 1. 출금 결과 모름
-        requestWithdrawalPortForTest.setThrowException(command.exchangeId());
+        requestWithdrawalPort.setThrowException(command.exchangeId());
 
         // 2. 출금 결과 확인 실패 1회
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
 
         // 3. 출금 결과 조회 지연
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(1));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(1));
 
         // 4. 출금 실패 확인
-        loadWithdrawalResultPortForTest.setFailed(command.exchangeId(), "FAILED");
+        loadWithdrawalResultPort.setFailed(command.exchangeId(), "FAILED");
 
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
@@ -887,18 +855,18 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 출금_결과_확인_실패_2회_후_출금_실패_확인_후_환전_실패() {
         // Given
         // 1. 출금 결과 모름
-        requestWithdrawalPortForTest.setThrowException(command.exchangeId());
+        requestWithdrawalPort.setThrowException(command.exchangeId());
 
         // 2. 출금 결과 확인 실패 2회
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
 
         // 3. 출금 결과 조회 지연
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(1));
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(2));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(1));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(2));
 
         // 4. 출금 실패 확인
-        loadWithdrawalResultPortForTest.setFailed(command.exchangeId(), "FAILED");
+        loadWithdrawalResultPort.setFailed(command.exchangeId(), "FAILED");
 
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
@@ -928,20 +896,20 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 출금_결과_확인_실패_3회_후_출금_실패_확인_후_환전_실패() {
         // Given
         // 1. 출금 결과 모름
-        requestWithdrawalPortForTest.setThrowException(command.exchangeId());
+        requestWithdrawalPort.setThrowException(command.exchangeId());
 
         // 2. 출금 결과 확인 실패 3회
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
 
         // 3. 출금 결과 조회 지연
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(1));
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(2));
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(3));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(1));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(2));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(3));
 
         // 4. 출금 실패 확인
-        loadWithdrawalResultPortForTest.setFailed(command.exchangeId(), "FAILED");
+        loadWithdrawalResultPort.setFailed(command.exchangeId(), "FAILED");
 
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
@@ -971,19 +939,19 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 출금_결과_확인_실패_4회_후_경고_메시지_발송() {
         // Given
         // 1. 출금 결과 모름
-        requestWithdrawalPortForTest.setThrowException(command.exchangeId());
+        requestWithdrawalPort.setThrowException(command.exchangeId());
 
         // 2. 출금 결과 확인 실패 4회
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
-        loadWithdrawalResultPortForTest.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
+        loadWithdrawalResultPort.setThrowException(command.exchangeId());
 
         // 3. 출금 결과 조회 지연 4회
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(1));
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(2));
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(3));
-        sendWithdrawalCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(4));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(1));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(2));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(3));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkWithdrawalWithDelay.accept(4));
 
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
@@ -1012,24 +980,23 @@ class ExchangeCurrencyServiceIntegrationTest {
     void 입금_결과_확인_실패_4회_후_경고_메시지_발송() {
         // Given
         // 1. 출금 성공
-        requestWithdrawalPortForTest.setSuccess(
+        requestWithdrawalPort.setSuccess(
                 command.exchangeId(), "SUCCESS", "withdrawalId");
 
         // 2. 입금 결과 모름
-        requestDepositPortForTest.setThrowException(command.exchangeId());
+        requestDepositPort.setThrowException(command.exchangeId());
 
         // 3. 입금 결과 확인 실패 4회
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
-        loadDepositResultPortForTest.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
+        loadDepositResultPort.setThrowException(command.exchangeId());
 
         // 4. 입금 결과 조회 지연 4회
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(1));
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(2));
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(3));
-        sendDepositCheckRequestPortForTest.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(4));
-
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(1));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(2));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(3));
+        scheduleCheckRequestPort.setNormal(command.exchangeId(), () -> checkDepositWithDelay.accept(4));
         // When
         assertThatThrownBy(() -> exchangeCurrencyService.exchangeCurrency(command))
                 .isInstanceOf(RuntimeException.class);

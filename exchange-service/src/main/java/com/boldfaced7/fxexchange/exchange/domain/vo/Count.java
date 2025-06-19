@@ -10,7 +10,7 @@ public record Count(int value) {
         return new Count(this.value + 1);
     }
 
-    public boolean isSmallerThan(int other) {
-        return value < other;
+    public boolean isEqualOrSmallerThan(int other) {
+        return value <= other;
     }
 }

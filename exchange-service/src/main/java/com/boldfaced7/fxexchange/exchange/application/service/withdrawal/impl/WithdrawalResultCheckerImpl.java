@@ -5,20 +5,17 @@ import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEvent
 import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher.ParamEventPublisher;
 import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher.SimpleEventPublisher;
 import com.boldfaced7.fxexchange.exchange.application.service.withdrawal.WithdrawalResultChecker;
-import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
 import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
 import com.boldfaced7.fxexchange.exchange.domain.vo.WithdrawalResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
 @Component
 @RequiredArgsConstructor
 public class WithdrawalResultCheckerImpl implements WithdrawalResultChecker {
 
-    private final Map<Direction, LoadWithdrawalResultPort> loadWithdrawalResultPorts;
+    private final LoadWithdrawalResultPort loadWithdrawalResultPort;
     private final ExchangeEventPublisher exchangeEventPublisher;
 
     public WithdrawalResult loadWithdrawalResult(
@@ -29,9 +26,10 @@ public class WithdrawalResultCheckerImpl implements WithdrawalResultChecker {
             Count count
     ) {
         try {
-            var deposited = loadWithdrawalResultPorts.get(requested.getDirection())
-                    .loadWithdrawalResult(requested.getExchangeId());
-
+            var deposited = loadWithdrawalResultPort.loadWithdrawalResult(
+                    requested.getExchangeId(),
+                    requested.getDirection()
+            );
             var publisher = (deposited.isSuccess()) ? whenSucceed : whenFailed;
             exchangeEventPublisher.publishEvents(requested, publisher);
 

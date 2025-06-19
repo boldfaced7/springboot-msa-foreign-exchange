@@ -56,6 +56,9 @@ subprojects {
         runtimeOnly 'com.mysql:mysql-connector-j'
         testImplementation 'org.testcontainers:mysql'
 
+        // H2 Database
+        testRuntimeOnly 'com.h2database:h2'
+
         // Kafka
         implementation 'org.springframework.kafka:spring-kafka'
         testImplementation 'org.springframework.kafka:spring-kafka-test'
@@ -77,8 +80,9 @@ subprojects {
         testImplementation 'org.testcontainers:junit-jupiter'
         testImplementation 'org.testcontainers:testcontainers'
         testImplementation 'org.testcontainers:jdbc'
+        testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
 
-        // Awaitilit
+        // Awaitility
         testImplementation 'org.awaitility:awaitility:4.2.0'
     }
 

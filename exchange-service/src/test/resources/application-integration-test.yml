@@ -1,0 +1,78 @@
+spring:
+  application:
+    name: exchange-service
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        highlight_sql: true
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+#    show-sql: false
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
+      timeout: 10000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1
+
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+    consumer:
+      group-id: exchange-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      ack-mode: MANUAL_IMMEDIATE
+
+    admin:
+      fail-fast: true
+      auto-create: true
+
+
+server:
+  port: 8081
+
+logging:
+  level:
+#    org.hibernate.SQL: INFO
+#    org.hibernate.orm.jdbc.bind: TRACE
+    org.apache.kafka: WARN
+    org.springframework.kafka: WARN
+    kafka: WARN
+kafka:
+  topic:
+    exchange:
+      deposit-check-topic: exchange-topic.deposit-check
+      withdrawal-check-topic: exchange-topic.withdrawal-check
+    krw-account:
+      withdrawal-cancel-request-topic: krw-account-topic.withdrawal.cancel.request
+      withdrawal-cancel-response-topic: krw-account-topic.withdrawal.cancel.response
+    fx-account:
+      withdrawal-cancel-request-topic: fx-account-topic.withdrawal.cancel
+      withdrawal-cancel-response-topic: krw-account-topic.withdrawal.cancel.response
+    scheduler:
+      scheduler-topic: scheduler-topic
+
+  header:
+    scheduler:
+      scheduled-time-millis: scheduled-time-millis
+
+exchange:
+  check:
+    max-count: 3

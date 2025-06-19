@@ -101,14 +101,14 @@ class ExchangeEventPublisherImplTest {
     void publishEventsWithExchangeRequestAndParam() {
         // given
         Count count = Count.zero();
-        doNothing().when(exchangeRequest).delayingWithdrawalCheckRequired(count);
+        doNothing().when(exchangeRequest).withdrawalCheckUnknown(count);
         doNothing().when(publishExchangeEventPort).publish(events);
 
         // when
-        exchangeEventPublisher.publishEvents(exchangeRequest, ExchangeRequest::delayingWithdrawalCheckRequired, count);
+        exchangeEventPublisher.publishEvents(exchangeRequest, ExchangeRequest::withdrawalCheckUnknown, count);
 
         // then
-        verify(exchangeRequest).delayingWithdrawalCheckRequired(count);
+        verify(exchangeRequest).withdrawalCheckUnknown(count);
         verify(publishExchangeEventPort).publish(events);
     }
 
@@ -118,15 +118,15 @@ class ExchangeEventPublisherImplTest {
         // given
         Count count = Count.zero();
         when(exchangeRequestLoader.loadExchangeRequest(requestId)).thenReturn(exchangeRequest);
-        doNothing().when(exchangeRequest).delayingWithdrawalCheckRequired(count);
+        doNothing().when(exchangeRequest).withdrawalCheckUnknown(count);
         doNothing().when(publishExchangeEventPort).publish(events);
 
         // when
-        exchangeEventPublisher.publishEvents(requestId, ExchangeRequest::delayingWithdrawalCheckRequired, count);
+        exchangeEventPublisher.publishEvents(requestId, ExchangeRequest::withdrawalCheckUnknown, count);
 
         // then
         verify(exchangeRequestLoader).loadExchangeRequest(requestId);
-        verify(exchangeRequest).delayingWithdrawalCheckRequired(count);
+        verify(exchangeRequest).withdrawalCheckUnknown(count);
         verify(publishExchangeEventPort).publish(events);
     }
 
@@ -136,15 +136,15 @@ class ExchangeEventPublisherImplTest {
         // given
         Count count = Count.zero();
         when(exchangeRequestLoader.loadExchangeRequest(exchangeId)).thenReturn(exchangeRequest);
-        doNothing().when(exchangeRequest).delayingWithdrawalCheckRequired(count);
+        doNothing().when(exchangeRequest).withdrawalCheckUnknown(count);
         doNothing().when(publishExchangeEventPort).publish(events);
 
         // when
-        exchangeEventPublisher.publishEvents(exchangeId, ExchangeRequest::delayingWithdrawalCheckRequired, count);
+        exchangeEventPublisher.publishEvents(exchangeId, ExchangeRequest::withdrawalCheckUnknown, count);
 
         // then
         verify(exchangeRequestLoader).loadExchangeRequest(exchangeId);
-        verify(exchangeRequest).delayingWithdrawalCheckRequired(count);
+        verify(exchangeRequest).withdrawalCheckUnknown(count);
         verify(publishExchangeEventPort).publish(events);
     }
 

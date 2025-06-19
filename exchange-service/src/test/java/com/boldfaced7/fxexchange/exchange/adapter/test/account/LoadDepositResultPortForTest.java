@@ -8,7 +8,7 @@ import com.boldfaced7.fxexchange.exchange.domain.vo.DepositId;
 import com.boldfaced7.fxexchange.exchange.domain.vo.DepositResult;
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Profile;
 
 import java.util.ArrayList;
@@ -18,8 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 @Slf4j
-@Primary
-@Profile("test")
+@TestConfiguration
+@Profile("application-test")
 public class LoadDepositResultPortForTest implements LoadDepositResultPort {
     private final Map<ExchangeId, List<DepositResult>> depositResults = new ConcurrentHashMap<>();
     private final Map<ExchangeId, List<TestBehavior>> behaviors = new ConcurrentHashMap<>();
@@ -33,7 +33,7 @@ public class LoadDepositResultPortForTest implements LoadDepositResultPort {
     }
     
     @Override
-    public DepositResult loadDepositResult(ExchangeId exchangeId) {
+    public DepositResult loadDepositResult(ExchangeId exchangeId, Direction direction) {
         TestBehavior behavior = getBehavior(exchangeId);
         DepositResult result = getDepositResult(exchangeId);
         Supplier<DepositResult> depositResultSupplier = () -> result;
@@ -128,11 +128,6 @@ public class LoadDepositResultPortForTest implements LoadDepositResultPort {
     public void setThrowException(ExchangeId exchangeId) {
         setBehavior(exchangeId, TestBehavior.THROW_EXCEPTION);
         setDepositResult(exchangeId, null);
-    }
-
-    @Override
-    public Direction direction() {
-        return Direction.BUY;
     }
 
 }

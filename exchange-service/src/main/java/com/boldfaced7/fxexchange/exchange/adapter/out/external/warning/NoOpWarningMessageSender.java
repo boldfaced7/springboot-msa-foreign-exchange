@@ -5,9 +5,7 @@ import com.boldfaced7.fxexchange.exchange.application.port.out.SendWarningMessag
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Profile;
 
-@Profile("!test")
 @ExternalSystemAdapter
 @RequiredArgsConstructor
 public class NoOpWarningMessageSender implements SendWarningMessagePort {

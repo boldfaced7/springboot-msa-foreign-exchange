@@ -10,11 +10,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CheckDepositWithDelayService implements CheckDepositWithDelayUseCase {
 
-    private final ExchangeEventPublisher exchangeEventFacilitator;
+    private final ExchangeEventPublisher exchangeEventPublisher;
 
     @Override
     public void checkDepositWithDelay(CheckDepositWithDelayCommand command) {
-        exchangeEventFacilitator.publishEvents(
+        exchangeEventPublisher.publishEvents(
                 command.exchangeId(),
                 ExchangeRequest::depositResultUnknown,
                 command.count()

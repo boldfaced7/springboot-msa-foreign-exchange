@@ -5,13 +5,15 @@ import com.boldfaced7.fxexchange.exchange.application.port.out.CancelWithdrawalP
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Profile;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-@Profile("test")
+@TestConfiguration
+@Profile("application-test")
 public class CancelWithdrawalPortForTest implements CancelWithdrawalPort {
     private final Map<ExchangeId, TestBehavior> behaviors = new ConcurrentHashMap<>();
     private final Map<ExchangeId, Runnable> callbacks = new ConcurrentHashMap<>();
@@ -22,11 +24,11 @@ public class CancelWithdrawalPortForTest implements CancelWithdrawalPort {
     }
     
     @Override
-    public void cancelWithdrawal(ExchangeId exchangeId) {
+    public void cancelWithdrawal(ExchangeId exchangeId, Direction direction) {
         TestBehavior behavior = behaviors.getOrDefault(exchangeId, TestBehavior.NORMAL);
         Runnable callback = callbacks.get(exchangeId);
 
-        log.info("[UndoWithdrawalPort] behavior: {}", behavior);
+        log.info("[CancelWithdrawalPort] behavior: {}", behavior);
 
         switch (behavior) {
             case NORMAL -> TestUtil.doAsync(callback);
@@ -56,10 +58,4 @@ public class CancelWithdrawalPortForTest implements CancelWithdrawalPort {
         setBehavior(exchangeId, TestBehavior.DELAY);
         setCallback(exchangeId, callback);
     }
-
-    @Override
-    public Direction direction() {
-        return Direction.BUY;
-    }
-
 }
