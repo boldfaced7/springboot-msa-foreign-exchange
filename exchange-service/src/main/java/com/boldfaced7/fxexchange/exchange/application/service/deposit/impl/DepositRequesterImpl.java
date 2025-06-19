@@ -5,20 +5,17 @@ import com.boldfaced7.fxexchange.exchange.application.service.deposit.DepositReq
 import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher;
 import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher.ParamEventPublisher;
 import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher.SimpleEventPublisher;
-import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
 import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
 import com.boldfaced7.fxexchange.exchange.domain.vo.DepositResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
 @Component
 @RequiredArgsConstructor
 public class DepositRequesterImpl implements DepositRequester {
 
-    private final Map<Direction, RequestDepositPort> requestDepositPorts;
+    private final RequestDepositPort requestDepositPort;
     private final ExchangeEventPublisher exchangeEventPublisher;
 
     public DepositResult requestDeposit(
@@ -28,7 +25,7 @@ public class DepositRequesterImpl implements DepositRequester {
             ParamEventPublisher<Count> whenExceptionOccurred
     ) {
         try {
-            var deposited = requestDepositPorts.get(requested.getDirection()).deposit(requested);
+            var deposited = requestDepositPort.deposit(requested);
             var publisher = (deposited.isSuccess()) ? whenSucceed : whenFailed;
             exchangeEventPublisher.publishEvents(requested, publisher);
             return deposited;

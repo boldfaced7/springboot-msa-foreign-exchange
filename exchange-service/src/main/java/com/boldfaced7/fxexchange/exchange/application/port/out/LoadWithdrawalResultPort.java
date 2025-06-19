@@ -5,6 +5,5 @@ import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import com.boldfaced7.fxexchange.exchange.domain.vo.WithdrawalResult;
 
 public interface LoadWithdrawalResultPort {
-    WithdrawalResult loadWithdrawalResult(ExchangeId exchangeId);
-    Direction direction();
+    WithdrawalResult loadWithdrawalResult(ExchangeId exchangeId, Direction direction);
 }

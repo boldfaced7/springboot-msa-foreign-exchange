@@ -7,10 +7,7 @@ import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEvent
 import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher.SimpleEventPublisher;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.AccountCommandStatus;
-import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
-import com.boldfaced7.fxexchange.exchange.domain.vo.DepositId;
-import com.boldfaced7.fxexchange.exchange.domain.vo.DepositResult;
+import com.boldfaced7.fxexchange.exchange.domain.vo.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,8 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
@@ -32,9 +27,6 @@ class DepositResultCheckerImplTest {
 
     @InjectMocks
     private DepositResultCheckerImpl depositResultChecker;
-
-    @Mock
-    private Map<Direction, LoadDepositResultPort> loadDepositResultPorts;
 
     @Mock
     private ExchangeEventPublisher exchangeEventPublisher;
@@ -58,7 +50,7 @@ class DepositResultCheckerImplTest {
     @BeforeEach
     void setUp() {
         when(exchangeRequest.getDirection()).thenReturn(Direction.BUY);
-        when(loadDepositResultPorts.get(Direction.BUY)).thenReturn(loadDepositResultPort);
+        when(exchangeRequest.getExchangeId()).thenReturn(new ExchangeId("exchangeId"));
 
         successResult = new DepositResult(true, new AccountCommandStatus("SUCCESS"), new DepositId("deposit-123"));
         failureResult = new DepositResult(false, new AccountCommandStatus("FAILED"), new DepositId("deposit-456"));
@@ -70,7 +62,10 @@ class DepositResultCheckerImplTest {
     void loadDepositResult_Success() {
         // given
         // 1. 입금 결과 조회 성공 설정
-        when(loadDepositResultPort.loadDepositResult(exchangeRequest.getExchangeId())).thenReturn(successResult);
+        when(loadDepositResultPort.loadDepositResult(
+                exchangeRequest.getExchangeId(),
+                Direction.BUY
+        )).thenReturn(successResult);
 
         // 2. 이벤트 발행 설정
         doNothing().when(exchangeEventPublisher).publishEvents(
@@ -84,7 +79,7 @@ class DepositResultCheckerImplTest {
                 exchangeRequest,
                 ExchangeRequest::depositSucceeded,
                 ExchangeRequest::depositFailed,
-                ExchangeRequest::delayingDepositCheckRequired,
+                ExchangeRequest::depositCheckUnknown,
                 count
         );
 
@@ -93,7 +88,7 @@ class DepositResultCheckerImplTest {
         assertThat(result).isEqualTo(successResult);
 
         // 2. 입금 결과 조회 호출 확인
-        verify(loadDepositResultPort).loadDepositResult(exchangeRequest.getExchangeId());
+        verify(loadDepositResultPort).loadDepositResult(exchangeRequest.getExchangeId(), Direction.BUY);
 
         // 3. 성공 이벤트 발행 확인
         verify(exchangeEventPublisher).publishEvents(
@@ -109,7 +104,10 @@ class DepositResultCheckerImplTest {
     void loadDepositResult_Failure() {
         // given
         // 1. 입금 결과 조회 실패 설정
-        when(loadDepositResultPort.loadDepositResult(exchangeRequest.getExchangeId())).thenReturn(failureResult);
+        when(loadDepositResultPort.loadDepositResult(
+                exchangeRequest.getExchangeId(),
+                Direction.BUY
+        )).thenReturn(failureResult);
 
         // 2. 이벤트 발행 설정
         doNothing().when(exchangeEventPublisher).publishEvents(
@@ -123,7 +121,7 @@ class DepositResultCheckerImplTest {
                 exchangeRequest,
                 ExchangeRequest::depositSucceeded,
                 ExchangeRequest::depositFailed,
-                ExchangeRequest::delayingDepositCheckRequired,
+                ExchangeRequest::depositCheckUnknown,
                 count
         );
 
@@ -132,7 +130,7 @@ class DepositResultCheckerImplTest {
         assertThat(result).isEqualTo(failureResult);
 
         // 2. 입금 결과 조회 호출 확인
-        verify(loadDepositResultPort).loadDepositResult(exchangeRequest.getExchangeId());
+        verify(loadDepositResultPort).loadDepositResult(exchangeRequest.getExchangeId(), Direction.BUY);
 
         // 3. 실패 이벤트 발행 확인
         verify(exchangeEventPublisher).publishEvents(
@@ -149,8 +147,10 @@ class DepositResultCheckerImplTest {
     void loadDepositResult_Exception() {
         // given
         // 1. 입금 결과 조회 예외 발생 설정
-        when(loadDepositResultPort.loadDepositResult(exchangeRequest.getExchangeId()))
-                .thenThrow(new RuntimeException("Network error"));
+        when(loadDepositResultPort.loadDepositResult(
+                exchangeRequest.getExchangeId(),
+                Direction.BUY
+        )).thenThrow(new RuntimeException("Network error"));
 
         // 2. 이벤트 발행 설정
         doNothing().when(exchangeEventPublisher).publishEvents(
@@ -158,7 +158,7 @@ class DepositResultCheckerImplTest {
                 any(ParamEventPublisher.class),
                 eq(count)
         );
-        doNothing().when(exchangeRequest).delayingDepositCheckRequired(any(Count.class));
+        doNothing().when(exchangeRequest).depositCheckUnknown(any(Count.class));
 
         // when & then
         // 1. 예외 발생 확인
@@ -166,13 +166,13 @@ class DepositResultCheckerImplTest {
                 exchangeRequest,
                 ExchangeRequest::depositSucceeded,
                 ExchangeRequest::depositFailed,
-                ExchangeRequest::delayingDepositCheckRequired,
+                ExchangeRequest::depositCheckUnknown,
                 count
         )).isInstanceOf(RuntimeException.class)
             .hasMessageContaining("Network error");
 
         // 2. 입금 결과 조회 호출 확인
-        verify(loadDepositResultPort).loadDepositResult(exchangeRequest.getExchangeId());
+        verify(loadDepositResultPort).loadDepositResult(exchangeRequest.getExchangeId(), Direction.BUY);
 
         // 3. 예외 이벤트 발행 확인
         verify(exchangeEventPublisher).publishEvents(
@@ -181,6 +181,6 @@ class DepositResultCheckerImplTest {
                 eq(count)
         );
         paramEventPublisherCaptor.getValue().publish(exchangeRequest, count);
-        verify(exchangeRequest).delayingDepositCheckRequired(count);
+        verify(exchangeRequest).depositCheckUnknown(count);
     }
 } 

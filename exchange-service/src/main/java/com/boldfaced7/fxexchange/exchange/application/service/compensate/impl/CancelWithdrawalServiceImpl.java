@@ -7,16 +7,14 @@ import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-
 @Service
 @RequiredArgsConstructor
 public class CancelWithdrawalServiceImpl implements CancelWithdrawalService {
 
-    private final Map<Direction, CancelWithdrawalPort> undoWithdrawalPorts;
+    private final CancelWithdrawalPort cancelWithdrawalPort;
 
     @Override
     public void cancelWithdrawal(ExchangeId exchangeId, Direction direction) {
-        undoWithdrawalPorts.get(direction).cancelWithdrawal(exchangeId);
+        cancelWithdrawalPort.cancelWithdrawal(exchangeId, direction);
     }
 }

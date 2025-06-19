@@ -5,7 +5,6 @@ import com.boldfaced7.fxexchange.exchange.application.service.deposit.impl.Depos
 import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher;
 import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher.ParamEventPublisher;
 import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher.SimpleEventPublisher;
-import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
 import com.boldfaced7.fxexchange.exchange.domain.vo.AccountCommandStatus;
 import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
@@ -21,8 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,9 +31,6 @@ class DepositRequesterImplTest {
 
     @InjectMocks
     private DepositRequesterImpl depositRequester;
-
-    @Mock
-    private Map<Direction, RequestDepositPort> requestDepositPorts;
 
     @Mock
     private ExchangeEventPublisher exchangeEventPublisher;
@@ -58,11 +52,6 @@ class DepositRequesterImplTest {
 
     @BeforeEach
     void setUp() {
-        // 1. ExchangeRequest 설정
-        when(exchangeRequest.getDirection()).thenReturn(Direction.BUY);
-        when(requestDepositPorts.get(eq(Direction.BUY))).thenReturn(requestDepositPort);
-
-        // 2. 결과 객체 생성
         successResult = new DepositResult(true, new AccountCommandStatus("SUCCESS"), new DepositId("deposit-123"));
         failureResult = new DepositResult(false, new AccountCommandStatus("FAILED"), new DepositId("deposit-456"));
     }
@@ -139,7 +128,6 @@ class DepositRequesterImplTest {
 
     @Test
     @DisplayName("입금 요청 중 예외 발생 시, 예외 이벤트 발행 람다를 전달한다")
-    @SuppressWarnings("unchecked")
     void requestDeposit_Exception() {
         // given
         // 1. 입금 요청 예외 발생 설정
