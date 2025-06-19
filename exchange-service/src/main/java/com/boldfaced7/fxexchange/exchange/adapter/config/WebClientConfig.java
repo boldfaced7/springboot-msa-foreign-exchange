@@ -2,8 +2,6 @@ package com.boldfaced7.fxexchange.exchange.adapter.config;
 
 import com.boldfaced7.fxexchange.exchange.application.exception.NetworkErrorException;
 import com.boldfaced7.fxexchange.exchange.application.exception.ServerUnavailableException;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -30,12 +28,6 @@ public class WebClientConfig {
     private static final Duration READ_TIMEOUT = Duration.ofSeconds(2);
     private static final Duration WRITE_TIMEOUT = Duration.ofSeconds(2);
 
-    // 서킷브레이커 설정
-    private static final int CIRCUIT_BREAKER_FAILURE_RATE_THRESHOLD = 50;
-    private static final int CIRCUIT_BREAKER_MINIMUM_NUMBER_OF_CALLS = 10;
-    private static final Duration CIRCUIT_BREAKER_WAIT_DURATION = Duration.ofSeconds(10);
-    private static final int CIRCUIT_BREAKER_PERMITTED_NUMBER_OF_CALLS_IN_HALF_OPEN_STATE = 5;
-
     private static final Map<String, String> SERVICE_ERROR_MESSAGES = Map.of(
             "fxDeposit", "외화 입금 서비스 장애",
             "krwWithdrawal", "원화 출금 서비스 장애",
@@ -43,36 +35,30 @@ public class WebClientConfig {
             "krwDeposit", "원화 입금 서비스 장애"
     );
 
-    @Value("${external.fx-deposit.base-url}")
-    private String fxDepositBaseUrl;
+    @Value("${external.fx-account.base-url}")
+    private String fxAccountBaseUrl;
 
-    @Value("${external.krw-withdrawal.base-url}")
-    private String krwWithdrawalBaseUrl;
-
-    @Value("${external.fx-withdrawal.base-url}")
-    private String fxWithdrawalBaseUrl;
-
-    @Value("${external.krw-deposit.base-url}")
-    private String krwDepositBaseUrl;
+    @Value("${external.krw-account.base-url}")
+    private String krwAccountBaseUrl;
 
     @Bean
     public WebClient fxDepositWebClient() {
-        return createWebClient(fxDepositBaseUrl, "fxDeposit");
+        return createWebClient(fxAccountBaseUrl, "fxDeposit");
     }
 
     @Bean
     public WebClient krwWithdrawalWebClient() {
-        return createWebClient(krwWithdrawalBaseUrl, "krwWithdrawal");
+        return createWebClient(krwAccountBaseUrl, "krwWithdrawal");
     }
 
     @Bean
     public WebClient fxWithdrawalWebClient() {
-        return createWebClient(fxWithdrawalBaseUrl, "fxWithdrawal");
+        return createWebClient(fxAccountBaseUrl, "fxWithdrawal");
     }
 
     @Bean
     public WebClient krwDepositWebClient() {
-        return createWebClient(krwDepositBaseUrl, "krwDeposit");
+        return createWebClient(krwAccountBaseUrl, "krwDeposit");
     }
 
     private WebClient createWebClient(String baseUrl, String serviceName) {
@@ -113,18 +99,5 @@ public class WebClientConfig {
             return new NetworkErrorException("통신 실패: " + error.getMessage());
         }
         return error;
-    }
-
-    @Bean
-    public CircuitBreaker circuitBreaker() {
-        CircuitBreakerConfig config = CircuitBreakerConfig.custom()
-                .failureRateThreshold(CIRCUIT_BREAKER_FAILURE_RATE_THRESHOLD)
-                .minimumNumberOfCalls(CIRCUIT_BREAKER_MINIMUM_NUMBER_OF_CALLS)
-                .waitDurationInOpenState(CIRCUIT_BREAKER_WAIT_DURATION)
-                .permittedNumberOfCallsInHalfOpenState(CIRCUIT_BREAKER_PERMITTED_NUMBER_OF_CALLS_IN_HALF_OPEN_STATE)
-                .recordExceptions(Exception.class)
-                .build();
-
-        return CircuitBreaker.of("webclient-circuit-breaker", config);
     }
 } 

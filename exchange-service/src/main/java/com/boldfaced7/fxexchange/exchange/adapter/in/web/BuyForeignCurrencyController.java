@@ -32,6 +32,7 @@ public class BuyForeignCurrencyController {
 
     private ExchangeCurrencyCommand toCommand(Request request) {
         return new ExchangeCurrencyCommand(
+                new ExchangeId(request.exchangeId()),
                 new UserId(request.userId()),
                 new BaseCurrency(request.baseCurrency()),
                 new BaseAmount(request.baseAmount()),
@@ -50,6 +51,7 @@ public class BuyForeignCurrencyController {
     }
 
     public record Request(
+            String exchangeId,
             String userId,
             CurrencyCode baseCurrency,
             int baseAmount,

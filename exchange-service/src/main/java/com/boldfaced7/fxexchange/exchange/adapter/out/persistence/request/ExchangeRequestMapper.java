@@ -4,7 +4,7 @@ import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
 import com.boldfaced7.fxexchange.exchange.domain.vo.*;
 
 public class ExchangeRequestMapper {
-    static ExchangeRequest toDomain(ExchangeRequestJpa jpa) {
+    public static ExchangeRequest toDomain(ExchangeRequestJpa jpa) {
         return ExchangeRequest.of(
                 new RequestId(jpa.getExchangeRequestId()),
                 new ExchangeId(jpa.getExchangeId()),
@@ -28,7 +28,7 @@ public class ExchangeRequestMapper {
         );
     }
 
-    static ExchangeRequestJpa toJpa(ExchangeRequest domain) {
+    public static ExchangeRequestJpa toJpa(ExchangeRequest domain) {
         return new ExchangeRequestJpa(
                 (domain.getRequestId() == null) ? null : domain.getRequestId().value(),
                 domain.getExchangeId().value(),

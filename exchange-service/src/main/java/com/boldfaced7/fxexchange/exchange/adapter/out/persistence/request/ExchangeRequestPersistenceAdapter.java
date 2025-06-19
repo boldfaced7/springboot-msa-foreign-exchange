@@ -8,9 +8,7 @@ import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Profile;
 
-@Profile("!test")
 @PersistenceAdapter
 @RequiredArgsConstructor
 public class ExchangeRequestPersistenceAdapter implements
@@ -25,6 +23,9 @@ public class ExchangeRequestPersistenceAdapter implements
         var found = exchangeRequestJpaRepository.findByExchangeRequestId(
                 requestId.value()
         );
+        if (found == null) {
+            throw new IllegalStateException("환전 요청을 찾을 수 없습니다: " + requestId.value());
+        }
         return ExchangeRequestMapper.toDomain(found);
     }
 
@@ -33,6 +34,9 @@ public class ExchangeRequestPersistenceAdapter implements
         var found = exchangeRequestJpaRepository.findByExchangeId(
                 exchangeId.value()
         );
+        if (found == null) {
+            throw new IllegalStateException("환전 요청을 찾을 수 없습니다: " + exchangeId.value());
+        }
         return ExchangeRequestMapper.toDomain(found);
     }
 
