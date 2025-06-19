@@ -4,11 +4,13 @@ import com.boldfaced7.fxexchange.exchange.application.port.out.PublishExchangeEv
 import com.boldfaced7.fxexchange.exchange.domain.event.DomainEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 
 @Slf4j
+@TestComponent
 @RequiredArgsConstructor
 public class PublishExchangeEventPortForTest implements PublishExchangeEventPort {
 

@@ -1,11 +1,13 @@
 package com.boldfaced7.fxexchange.exchange.adapter.test.account;
 
 import com.boldfaced7.fxexchange.exchange.adapter.test.TestUtil;
-import com.boldfaced7.fxexchange.exchange.application.port.out.SendWithdrawalCheckRequestPort;
+import com.boldfaced7.fxexchange.exchange.application.port.out.ScheduleCheckRequestPort;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
+import com.boldfaced7.fxexchange.exchange.domain.enums.TransactionCheckType;
 import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Profile;
 
 import java.time.Duration;
@@ -15,8 +17,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-@Profile("test")
-public class SendWithdrawalCheckRequestPortForTest implements SendWithdrawalCheckRequestPort {
+@TestConfiguration
+@Profile("application-test")
+public class ScheduleCheckRequestPortForTest implements ScheduleCheckRequestPort {
     private final Map<ExchangeId, List<TestBehavior>> behaviors = new ConcurrentHashMap<>();
     private final Map<ExchangeId, List<Runnable>> callbacks = new ConcurrentHashMap<>();
     private final Map<ExchangeId, Integer> callCounts = new ConcurrentHashMap<>();
@@ -27,7 +30,13 @@ public class SendWithdrawalCheckRequestPortForTest implements SendWithdrawalChec
     }
     
     @Override
-    public void sendWithdrawalCheckRequest(ExchangeId exchangeId, Duration delay, Count count, Direction direction) {
+    public void scheduleCheckRequest(
+            ExchangeId exchangeId,
+            Duration delay,
+            Count count,
+            Direction direction,
+            TransactionCheckType transactionCheckType
+    ) {
         int callCount = callCounts.merge(exchangeId, 1, Integer::sum) - 1; // 0-based
         List<TestBehavior> behaviorList = behaviors.get(exchangeId);
         List<Runnable> callbackList = callbacks.get(exchangeId);
@@ -47,7 +56,7 @@ public class SendWithdrawalCheckRequestPortForTest implements SendWithdrawalChec
                     : callbackList.getLast();
         }
 
-        log.info("[SendWithdrawalCheckRequestPort] behavior: {}", behavior);
+        log.info("[scheduleCheckRequestPort] behavior: {}", behavior);
 
         switch (behavior) {
             case NORMAL -> TestUtil.doAsync(callback);

@@ -7,6 +7,7 @@ import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Profile;
 
 import java.util.List;
@@ -14,7 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
-@Profile("test")
+@TestConfiguration
+@Profile("application-test")
 public class ExchangeRequestPersistenceAdapterForTest implements
         LoadExchangeRequestPort,
         SaveExchangeRequestPort,
