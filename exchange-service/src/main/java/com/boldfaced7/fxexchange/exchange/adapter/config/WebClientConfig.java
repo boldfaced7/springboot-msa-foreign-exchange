@@ -1,11 +1,12 @@
 package com.boldfaced7.fxexchange.exchange.adapter.config;
 
+import com.boldfaced7.fxexchange.exchange.adapter.out.property.WebClientBaseUrlProperties;
 import com.boldfaced7.fxexchange.exchange.application.exception.NetworkErrorException;
 import com.boldfaced7.fxexchange.exchange.application.exception.ServerUnavailableException;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -21,6 +22,7 @@ import java.util.Map;
 
 @Slf4j
 @Configuration
+@RequiredArgsConstructor
 public class WebClientConfig {
 
     // 타임아웃 설정
@@ -35,30 +37,28 @@ public class WebClientConfig {
             "krwDeposit", "원화 입금 서비스 장애"
     );
 
-    @Value("${external.fx-account.base-url}")
-    private String fxAccountBaseUrl;
+    private final WebClientBaseUrlProperties accountBaseUrl;
 
-    @Value("${external.krw-account.base-url}")
-    private String krwAccountBaseUrl;
+
 
     @Bean
     public WebClient fxDepositWebClient() {
-        return createWebClient(fxAccountBaseUrl, "fxDeposit");
+        return createWebClient(accountBaseUrl.fxAccountBaseUrl(), "fxDeposit");
     }
 
     @Bean
     public WebClient krwWithdrawalWebClient() {
-        return createWebClient(krwAccountBaseUrl, "krwWithdrawal");
+        return createWebClient(accountBaseUrl.krwAccountBaseUrl(), "krwWithdrawal");
     }
 
     @Bean
     public WebClient fxWithdrawalWebClient() {
-        return createWebClient(fxAccountBaseUrl, "fxWithdrawal");
+        return createWebClient(accountBaseUrl.fxAccountBaseUrl(), "fxWithdrawal");
     }
 
     @Bean
     public WebClient krwDepositWebClient() {
-        return createWebClient(krwAccountBaseUrl, "krwDeposit");
+        return createWebClient(accountBaseUrl.krwAccountBaseUrl(), "krwDeposit");
     }
 
     private WebClient createWebClient(String baseUrl, String serviceName) {
