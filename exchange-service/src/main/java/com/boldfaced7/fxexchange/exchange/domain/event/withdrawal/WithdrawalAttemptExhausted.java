@@ -8,14 +8,13 @@ import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
 
 import java.time.LocalDateTime;
 
-public record WithdrawalResultUnknown(
+public record WithdrawalAttemptExhausted(
+        Direction direction,
         RequestId requestId,
         ExchangeId exchangeId,
-        Direction direction,
-        Count count,
         LocalDateTime raisedAt
 ) implements DomainEvent {
-    public WithdrawalResultUnknown(RequestId requestId, ExchangeId exchangeId, Direction direction, Count count) {
-        this(requestId, exchangeId, direction, count, LocalDateTime.now());
+    public WithdrawalAttemptExhausted(RequestId requestId, ExchangeId exchangeId, Direction direction) {
+        this(direction, requestId, exchangeId, LocalDateTime.now());
     }
 }

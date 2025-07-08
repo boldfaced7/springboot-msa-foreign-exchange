@@ -9,7 +9,7 @@ import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-public record DepositCheckUnknown(
+public record DepositUnknown(
         Direction direction,
         RequestId requestId,
         ExchangeId exchangeId,
@@ -17,7 +17,7 @@ public record DepositCheckUnknown(
         Duration delay,
         LocalDateTime raisedAt
 ) implements DomainEvent {
-    public DepositCheckUnknown(
+    public DepositUnknown(
             RequestId requestId,
             ExchangeId exchangeId,
             Direction direction,
