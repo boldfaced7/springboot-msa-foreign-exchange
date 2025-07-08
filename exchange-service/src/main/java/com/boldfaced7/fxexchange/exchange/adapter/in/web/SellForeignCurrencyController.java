@@ -45,8 +45,8 @@ public class SellForeignCurrencyController {
     private Response toResponse(ExchangeDetail exchangeDetail) {
         return new Response(
                 exchangeDetail.exchangeRequest().getExchangeId().value(),
-                exchangeDetail.withdrawalResult().withdrawalId().value(),
-                exchangeDetail.depositResult().depositId().value()
+                exchangeDetail.withdrawal().getWithdrawalId().value(),
+                exchangeDetail.deposit().getDepositId().value()
         );
     }
 
