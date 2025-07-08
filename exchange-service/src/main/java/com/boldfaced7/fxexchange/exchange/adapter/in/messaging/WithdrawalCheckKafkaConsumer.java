@@ -21,7 +21,7 @@ public class WithdrawalCheckKafkaConsumer {
     private final CheckWithdrawalWithDelayUseCase checkWithdrawalWithDelayUseCase;
 
     @KafkaListener(
-            topics = "${kafka.topic.exchange.withdrawal-check-topic}",
+            topics = "${kafka.exchange.withdrawal-check-topic}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void consume(String message, Acknowledgment ack) {

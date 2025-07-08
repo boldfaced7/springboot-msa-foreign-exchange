@@ -21,7 +21,7 @@ public class DepositCheckKafkaConsumer {
     private final CheckDepositWithDelayUseCase checkDepositWithDelayUseCase;
 
     @KafkaListener(
-            topics = "${kafka.topic.exchange.deposit-check-topic}",
+            topics = "${kafka.exchange.deposit-check-topic}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void consume(String message, Acknowledgment ack) {

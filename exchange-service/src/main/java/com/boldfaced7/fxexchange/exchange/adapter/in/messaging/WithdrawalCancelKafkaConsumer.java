@@ -21,7 +21,7 @@ public class WithdrawalCancelKafkaConsumer {
     private final CompleteWithdrawalCancelUseCase completeWithdrawalCancelUseCase;
 
     @KafkaListener(
-            topics  = "${kafka.topic.fx-account.withdrawal-cancel-response-topic}",
+            topics  = "${kafka.fx-account.withdrawal-cancel-response-topic}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void fromFxAccount(String message, Acknowledgment ack) {
@@ -29,7 +29,7 @@ public class WithdrawalCancelKafkaConsumer {
     }
 
     @KafkaListener(
-            topics  = "${kafka.topic.krw-account.withdrawal-cancel-response-topic}",
+            topics  = "${kafka.krw-account.withdrawal-cancel-response-topic}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void fromKrwAccount(String message, Acknowledgment ack) {
@@ -61,8 +61,8 @@ public class WithdrawalCancelKafkaConsumer {
 
     private CompleteWithdrawalCancelCommand toCommand(WithdrawalCancelMessage message, Direction direction) {
         return new CompleteWithdrawalCancelCommand(
-                new ExchangeId(message.exchangeId()),
                 new WithdrawalCancelId(message.withdrawalCancelId()),
+                new ExchangeId(message.exchangeId()),
                 direction
         );
     }
