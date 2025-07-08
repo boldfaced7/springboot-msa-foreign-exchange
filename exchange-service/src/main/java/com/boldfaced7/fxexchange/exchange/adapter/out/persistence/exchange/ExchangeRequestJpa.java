@@ -1,4 +1,4 @@
-package com.boldfaced7.fxexchange.exchange.adapter.out.persistence.request;
+package com.boldfaced7.fxexchange.exchange.adapter.out.persistence.exchange;
 
 import com.boldfaced7.fxexchange.exchange.domain.enums.CurrencyCode;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
@@ -30,10 +30,6 @@ public class ExchangeRequestJpa {
     private int baseAmount;
     private int quoteAmount;
     private double exchangeRate;
-
-    private String withdrawalId;
-    private String depositId;
-    private String withdrawalCancelId;
 
     private boolean finished;
     private LocalDateTime createdAt;
