@@ -1,7 +1,9 @@
 package com.boldfaced7.fxexchange.exchange.adapter.out.messaging;
 
 import com.boldfaced7.fxexchange.common.MessagingAdapter;
-import com.boldfaced7.fxexchange.exchange.application.port.out.CancelWithdrawalPort;
+import com.boldfaced7.fxexchange.exchange.adapter.out.messaging.util.MessageSerializer;
+import com.boldfaced7.fxexchange.exchange.adapter.out.messaging.util.WithdrawalCancelTopicMapper;
+import com.boldfaced7.fxexchange.exchange.application.port.out.cancel.CancelWithdrawalPort;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import lombok.RequiredArgsConstructor;

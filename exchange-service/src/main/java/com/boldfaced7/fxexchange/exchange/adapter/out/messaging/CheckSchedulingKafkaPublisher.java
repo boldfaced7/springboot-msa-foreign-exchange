@@ -1,14 +1,16 @@
 package com.boldfaced7.fxexchange.exchange.adapter.out.messaging;
 
 import com.boldfaced7.fxexchange.common.MessagingAdapter;
-import com.boldfaced7.fxexchange.exchange.application.port.out.ScheduleCheckRequestPort;
+import com.boldfaced7.fxexchange.exchange.adapter.out.messaging.util.CheckSchedulingTopicMapper;
+import com.boldfaced7.fxexchange.exchange.adapter.out.messaging.util.MessageSerializer;
+import com.boldfaced7.fxexchange.exchange.adapter.out.property.KafkaSchedulerProperties;
+import com.boldfaced7.fxexchange.exchange.application.port.out.external.ScheduleCheckRequestPort;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
-import com.boldfaced7.fxexchange.exchange.domain.enums.TransactionCheckType;
+import com.boldfaced7.fxexchange.exchange.domain.enums.TransactionType;
 import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.kafka.support.SendResult;
@@ -22,14 +24,9 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class CheckSchedulingKafkaPublisher implements ScheduleCheckRequestPort {
 
+    private final KafkaSchedulerProperties schedulerProperties;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final CheckSchedulingTopicMapper checkSchedulingTopicMapper;
-
-    @Value("${kafka.topic.scheduler.scheduler-topic}")
-    private String schedulerTopic;
-
-    @Value("${kafka.header.scheduler.scheduled-time-millis}")
-    private String scheduledTimeMillisHeader;
 
     @Override
     public void scheduleCheckRequest(
@@ -37,20 +34,27 @@ public class CheckSchedulingKafkaPublisher implements ScheduleCheckRequestPort {
             Duration delay,
             Count count,
             Direction direction,
-            TransactionCheckType transactionCheckType
+            TransactionType transactionType
     ) {
         log.info("[CheckScheduling] 스케줄링 요청 시작 - exchangeId: {}, delay: {}, count: {}, direction: {}, checkType: {}", 
-                exchangeId.value(), delay.toMillis(), count.value(), direction, transactionCheckType);
+                exchangeId.value(), delay.toMillis(), count.value(), direction, transactionType);
         
         var request = new CheckSchedulingRequest(exchangeId, count, direction);
         var payload = MessageSerializer.serializeMessage(request);
-        var replyTopic = checkSchedulingTopicMapper.getTopic(transactionCheckType);
+        var replyTopic = checkSchedulingTopicMapper.getTopic(transactionType);
+
 
         var kafkaMessage = MessageBuilder.withPayload(payload)
-                .setHeader(KafkaHeaders.TOPIC, schedulerTopic)
+                .setHeader(KafkaHeaders.TOPIC, schedulerProperties.schedulerTopic())
                 .setHeader(KafkaHeaders.REPLY_TOPIC, replyTopic)
-                .setHeader(scheduledTimeMillisHeader, delay.toMillis())
+                .setHeader(schedulerProperties.scheduledTimeMillisHeader(), delay.toMillis())
                 .build();
+
+        log.info(
+                "[CheckScheduling] 스케줄링 토픽 - topic: {}, replyTopic: {}",
+                kafkaMessage.getHeaders().get(KafkaHeaders.TOPIC),
+                kafkaMessage.getHeaders().get(KafkaHeaders.REPLY_TOPIC)
+        );
 
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(kafkaMessage);
         future.thenAccept(result -> {
