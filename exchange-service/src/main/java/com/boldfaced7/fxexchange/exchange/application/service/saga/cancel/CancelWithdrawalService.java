@@ -1,4 +1,4 @@
-package com.boldfaced7.fxexchange.exchange.application.service.compensate;
+package com.boldfaced7.fxexchange.exchange.application.service.saga.cancel;
 
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;

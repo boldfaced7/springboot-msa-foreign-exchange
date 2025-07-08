@@ -1,7 +1,7 @@
-package com.boldfaced7.fxexchange.exchange.application.service.compensate.impl;
+package com.boldfaced7.fxexchange.exchange.application.service.saga.cancel.impl;
 
-import com.boldfaced7.fxexchange.exchange.application.port.out.CancelWithdrawalPort;
-import com.boldfaced7.fxexchange.exchange.application.service.compensate.CancelWithdrawalService;
+import com.boldfaced7.fxexchange.exchange.application.port.out.cancel.CancelWithdrawalPort;
+import com.boldfaced7.fxexchange.exchange.application.service.saga.cancel.CancelWithdrawalService;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import lombok.RequiredArgsConstructor;
