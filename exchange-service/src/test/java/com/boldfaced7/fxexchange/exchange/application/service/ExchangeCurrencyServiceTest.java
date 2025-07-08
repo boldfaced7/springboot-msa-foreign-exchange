@@ -1,132 +1,55 @@
 package com.boldfaced7.fxexchange.exchange.application.service;
 
-import com.boldfaced7.fxexchange.exchange.application.port.in.ExchangeCurrencyCommand;
-import com.boldfaced7.fxexchange.exchange.application.port.out.SaveExchangeRequestPort;
-import com.boldfaced7.fxexchange.exchange.application.saga.ExchangeCurrencySagaOrchestrator;
-import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher;
-import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher.SimpleEventPublisher;
-import com.boldfaced7.fxexchange.exchange.domain.enums.CurrencyCode;
-import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
+import com.boldfaced7.fxexchange.exchange.application.port.out.event.PublishEventPort;
+import com.boldfaced7.fxexchange.exchange.application.port.out.exchange.SaveExchangeRequestPort;
+import com.boldfaced7.fxexchange.exchange.application.service.saga.ExchangeCurrencySagaOrchestrator;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.*;
-import org.junit.jupiter.api.BeforeEach;
+import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeDetail;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.boldfaced7.fxexchange.exchange.application.util.TestConstraints.EXCHANGE_CURRENCY_COMMAND;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ExchangeCurrencyServiceTest {
 
-    @InjectMocks
-    private ExchangeCurrencyService exchangeCurrencyService;
+    @InjectMocks ExchangeCurrencyService exchangeCurrencyService;
 
-    @Mock
-    private SaveExchangeRequestPort saveExchangeRequestPort;
+    @Mock SaveExchangeRequestPort saveExchangeRequestPort;
+    @Mock PublishEventPort publishEventPort;
+    @Mock ExchangeCurrencySagaOrchestrator exchangeCurrencySagaOrchestrator;
+    @Mock ExchangeRequest savedExchange;
 
-    @Mock
-    private ExchangeEventPublisher exchangeEventPublisher;
-
-    @Mock
-    private ExchangeCurrencySagaOrchestrator exchangeCurrencySagaOrchestrator;
-
-    @Mock
-    private ExchangeRequest exchangeRequest;
-
-    @Mock
-    private ExchangeDetail expectedDetail;
-
-    private ExchangeCurrencyCommand command;
-
-    @Captor
-    private ArgumentCaptor<SimpleEventPublisher> exchangeCurrencyStartedCaptor;
-
-    @BeforeEach
-    void setUp() {
-        command = new ExchangeCurrencyCommand(
-                new UserId("userId"),
-                new BaseCurrency(CurrencyCode.USD),
-                new BaseAmount(100),
-                new QuoteAmount(130000),
-                Direction.BUY,
-                new ExchangeRate(1300.0)
-        );
-    }
+    ExchangeDetail expectedExchangeDetail = new ExchangeDetail(savedExchange, null, null);
 
     @Test
-    @DisplayName("환전 거래를 성공적으로 처리한다")
-    void exchangeCurrency_Success() {
-        // given
-        doReturn(exchangeRequest).when(saveExchangeRequestPort).save(
-                any(ExchangeRequest.class)
-        );
-        doNothing().when(exchangeEventPublisher).publishEvents(
-                eq(command.exchangeId()),
-                any(SimpleEventPublisher.class)
-        );
-        doReturn(expectedDetail).when(exchangeCurrencySagaOrchestrator).startExchange(
-                any(ExchangeRequest.class)
-        );
+    @DisplayName("환전 요청이 성공적으로 처리된다")
+    void exchangeCurrency_success() {
+        // Given
+        when(saveExchangeRequestPort.save(any(ExchangeRequest.class)))
+                .thenReturn(savedExchange);
+        when(exchangeCurrencySagaOrchestrator.startExchange(savedExchange))
+                .thenReturn(expectedExchangeDetail);
 
-        // when
-        ExchangeDetail result = exchangeCurrencyService.exchangeCurrency(command);
+        // When
+        ExchangeDetail result = exchangeCurrencyService
+                .exchangeCurrency(EXCHANGE_CURRENCY_COMMAND);
 
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result).isEqualTo(expectedDetail);
+        // Then
+        assertNotNull(result);
 
-        verify(saveExchangeRequestPort).save(
-                any(ExchangeRequest.class)
-        );
-        verify(exchangeEventPublisher).publishEvents(
-                eq(command.exchangeId()),
-                any(SimpleEventPublisher.class)
-        );
-        verify(exchangeCurrencySagaOrchestrator).startExchange(
-                any(ExchangeRequest.class)
-        );
+        verify(saveExchangeRequestPort).save(any(ExchangeRequest.class));
+        verify(savedExchange).markExchangeCurrencyStarted();
+        verify(publishEventPort).publish(savedExchange);
+        verify(exchangeCurrencySagaOrchestrator).startExchange(savedExchange);
+
     }
-
-    @Test
-    @DisplayName("이벤트 발행기에 전달하는 람다를 검증한다")
-    void exchangeCurrency_LambdaVerification() {
-        // given
-        doReturn(exchangeRequest).when(saveExchangeRequestPort).save(
-                any(ExchangeRequest.class)
-        );
-        doNothing().when(exchangeEventPublisher).publishEvents(
-                eq(command.exchangeId()),
-                any(SimpleEventPublisher.class)
-        );
-        doReturn(expectedDetail).when(exchangeCurrencySagaOrchestrator).startExchange(
-                any(ExchangeRequest.class)
-        );
-
-        // when & then
-        exchangeCurrencyService.exchangeCurrency(command);
-
-        verify(saveExchangeRequestPort).save(
-                any(ExchangeRequest.class)
-        );
-        verify(exchangeEventPublisher).publishEvents(
-                eq(command.exchangeId()),
-                exchangeCurrencyStartedCaptor.capture()
-        );
-        verify(exchangeCurrencySagaOrchestrator).startExchange(
-                any(ExchangeRequest.class)
-        );
-
-        // 람다식의 동작 검증
-        exchangeCurrencyStartedCaptor.getValue().publish(exchangeRequest);
-        verify(exchangeRequest).exchangeCurrencyStarted();
-    }
-
-}
+} 

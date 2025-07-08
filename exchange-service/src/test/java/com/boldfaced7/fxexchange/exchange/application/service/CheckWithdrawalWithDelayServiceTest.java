@@ -1,75 +1,63 @@
 package com.boldfaced7.fxexchange.exchange.application.service;
 
 import com.boldfaced7.fxexchange.exchange.application.port.in.CheckWithdrawalWithDelayCommand;
-import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher;
-import com.boldfaced7.fxexchange.exchange.application.service.util.ExchangeEventPublisher.ParamEventPublisher;
-import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
+import com.boldfaced7.fxexchange.exchange.application.port.out.cache.LoadExchangeRequestCachePort;
+import com.boldfaced7.fxexchange.exchange.application.port.out.event.PublishEventPort;
+import com.boldfaced7.fxexchange.exchange.domain.exception.ExchangeRequestNotFoundException;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import java.util.Optional;
 
-@SuppressWarnings("unchecked")
+import static com.boldfaced7.fxexchange.exchange.application.util.TestConstraints.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class CheckWithdrawalWithDelayServiceTest {
 
-    @InjectMocks
-    private CheckWithdrawalWithDelayService checkWithdrawalWithDelayService;
+    @InjectMocks CheckWithdrawalWithDelayService checkWithdrawalWithDelayService;
 
-    @Mock
-    private ExchangeEventPublisher exchangeEventPublisher;
+    @Mock LoadExchangeRequestCachePort loadExchangeRequestCachePort;
+    @Mock PublishEventPort publishEventPort;
+    @Mock ExchangeRequest exchange;
 
-    @Mock
-    private ExchangeRequest exchangeRequest;
+    CheckWithdrawalWithDelayCommand command
+            = new CheckWithdrawalWithDelayCommand(EXCHANGE_ID, COUNT_ONE, DIRECTION_BUY);
 
-    private ExchangeId exchangeId;
-    private Count count;
-    private CheckWithdrawalWithDelayCommand command;
+    @Test
+    @DisplayName("지연 후 출금 확인이 정상적으로 처리된다")
+    void checkWithdrawalWithDelay_success() {
+        // Given
+        when(loadExchangeRequestCachePort.loadByExchangeId(EXCHANGE_ID))
+                .thenReturn(Optional.of(exchange));
 
-    @Captor
-    private ArgumentCaptor<ExchangeEventPublisher.ParamEventPublisher<Count>> withdrawalResultUnknownCaptor;
+        // When
+        checkWithdrawalWithDelayService.checkWithdrawalWithDelay(command);
 
-    @BeforeEach
-    void setUp() {
-        exchangeId = new ExchangeId("exchangeId");
-        count = new Count(1);
-        command = new CheckWithdrawalWithDelayCommand(exchangeId, count, Direction.BUY);
+        // Then
+        verify(loadExchangeRequestCachePort).loadByExchangeId(EXCHANGE_ID);
+        verify(exchange).markWithdrawalUnknown(COUNT_ONE);
+        verify(publishEventPort).publish(exchange);
     }
 
     @Test
-    @DisplayName("출금 확인 요청 시, 전달되는 람다를 검증한다")
-    void checkWithdrawalWithDelay_Success() {
-        // given
-        doNothing().when(exchangeEventPublisher).publishEvents(
-                eq(exchangeId),
-                any(ParamEventPublisher.class),
-                eq(count)
-        );
-        // when
-        checkWithdrawalWithDelayService.checkWithdrawalWithDelay(command);
+    @DisplayName("환전 요청이 없으면 예외가 발생한다")
+    void checkWithdrawalWithDelay_exchangeRequest_not_found() {
+        // Given
+        when(loadExchangeRequestCachePort.loadByExchangeId(EXCHANGE_ID))
+                .thenReturn(Optional.empty());
 
-        // then
-        verify(exchangeEventPublisher).publishEvents(
-            eq(exchangeId),
-            withdrawalResultUnknownCaptor.capture(),
-            eq(count)
-    );
+        // When & Then
+        assertThrows(ExchangeRequestNotFoundException.class,
+                () -> checkWithdrawalWithDelayService.checkWithdrawalWithDelay(command));
 
-        // 람다식의 동작 검증
-        // 출금 결과 알 수 없음 람다 검증
-        withdrawalResultUnknownCaptor.getValue().publish(exchangeRequest, count);
-        verify(exchangeRequest).withdrawalResultUnknown(count);
+        verify(loadExchangeRequestCachePort).loadByExchangeId(EXCHANGE_ID);
     }
-
-}
+} 
