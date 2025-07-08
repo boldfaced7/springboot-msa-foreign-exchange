@@ -1,7 +1,7 @@
-package com.boldfaced7.fxexchange.exchange.application.port.out;
+package com.boldfaced7.fxexchange.exchange.application.port.out.external;
 
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
-import com.boldfaced7.fxexchange.exchange.domain.enums.TransactionCheckType;
+import com.boldfaced7.fxexchange.exchange.domain.enums.TransactionType;
 import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
 import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 
@@ -13,6 +13,6 @@ public interface ScheduleCheckRequestPort {
             Duration delay,
             Count count,
             Direction direction,
-            TransactionCheckType transactionCheckType
+            TransactionType transactionType
     );
 }
