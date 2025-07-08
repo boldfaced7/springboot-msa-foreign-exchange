@@ -1,9 +1,5 @@
-package com.boldfaced7.fxexchange.exchange.adapter.out;
+package com.boldfaced7.fxexchange.exchange.adapter.out.external.account;
 
-import com.boldfaced7.fxexchange.exchange.adapter.out.external.account.FxAccountHttpClient;
-import com.boldfaced7.fxexchange.exchange.adapter.out.external.account.KrwAccountHttpClient;
-import com.boldfaced7.fxexchange.exchange.adapter.out.external.account.LoadTransactionClient;
-import com.boldfaced7.fxexchange.exchange.adapter.out.external.account.RequestTransactionClient;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import org.springframework.stereotype.Component;
 
