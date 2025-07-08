@@ -5,8 +5,8 @@ import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
 import com.boldfaced7.fxexchange.exchange.domain.vo.WithdrawalCancelId;
 
 public record CompleteWithdrawalCancelCommand(
-        ExchangeId exchangeId,
         WithdrawalCancelId withdrawalCancelId,
+        ExchangeId exchangeId,
         Direction direction
 ) {
 }

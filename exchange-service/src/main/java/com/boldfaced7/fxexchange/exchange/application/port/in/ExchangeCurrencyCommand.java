@@ -14,27 +14,6 @@ public record ExchangeCurrencyCommand(
         QuoteAmount quoteAmount,
         ExchangeRate exchangeRate
 ) {
-
-        public ExchangeCurrencyCommand(
-                UserId userId,
-                BaseCurrency baseCurrency,
-                BaseAmount baseAmount,
-                QuoteAmount quoteAmount,
-                Direction direction,
-                ExchangeRate exchangeRate
-        ) {
-                this(
-                        new ExchangeId(),
-                        userId,
-                        baseCurrency,
-                        new QuoteCurrency(CurrencyCode.KRW),
-                        direction,
-                        baseAmount,
-                        quoteAmount, 
-                        exchangeRate
-                );
-        }
-
         public ExchangeCurrencyCommand(
                 ExchangeId exchangeId,
                 UserId userId,

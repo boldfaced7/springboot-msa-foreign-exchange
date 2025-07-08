@@ -1,13 +1,14 @@
 package com.boldfaced7.fxexchange.exchange.adapter.out.external.account;
 
-import com.boldfaced7.fxexchange.exchange.adapter.out.AccountTransactionClientMapper;
-import com.boldfaced7.fxexchange.exchange.application.port.out.LoadDepositResultPort;
-import com.boldfaced7.fxexchange.exchange.application.port.out.LoadWithdrawalResultPort;
-import com.boldfaced7.fxexchange.exchange.application.port.out.RequestDepositPort;
-import com.boldfaced7.fxexchange.exchange.application.port.out.RequestWithdrawalPort;
-import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
+import com.boldfaced7.fxexchange.exchange.application.port.out.deposit.LoadDepositPort;
+import com.boldfaced7.fxexchange.exchange.application.port.out.deposit.RequestDepositPort;
+import com.boldfaced7.fxexchange.exchange.application.port.out.withdrawal.LoadWithdrawalPort;
+import com.boldfaced7.fxexchange.exchange.application.port.out.withdrawal.RequestWithdrawalPort;
+import com.boldfaced7.fxexchange.exchange.domain.model.Deposit;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.*;
+import com.boldfaced7.fxexchange.exchange.domain.model.Withdrawal;
+import com.boldfaced7.fxexchange.exchange.domain.vo.DepositId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.WithdrawalId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -17,63 +18,65 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AccountTransactionAdapter implements
         RequestDepositPort,
-        LoadDepositResultPort,
+        LoadDepositPort,
         RequestWithdrawalPort,
-        LoadWithdrawalResultPort
+        LoadWithdrawalPort
 {
     private final AccountTransactionClientMapper clientMapper;
 
     @Override
-    public DepositResult loadDepositResult(ExchangeId exchangeId, Direction direction) {
-        return clientMapper.getDepositResultClient(direction)
-                .loadDepositResult(exchangeId)
-                .map(AccountTransactionAdapter::toDepositResult)
+    public Deposit deposit(ExchangeRequest exchange) {
+        return clientMapper.getDepositClient(exchange.getDirection())
+                .requestDeposit(exchange)
+                .map(response -> toDeposit(response, exchange))
                 .block();
     }
 
     @Override
-    public WithdrawalResult loadWithdrawalResult(ExchangeId exchangeId, Direction direction) {
-        return clientMapper.getWithdrawalResultClient(direction)
-                .loadWithdrawalResult(exchangeId)
-                .map(AccountTransactionAdapter::toWithdrawalResult)
+    public Deposit loadDeposit(ExchangeRequest exchange) {
+        return clientMapper.getDepositResultClient(exchange.getDirection())
+                .loadDepositResult(exchange.getExchangeId())
+                .map(response -> toDeposit(response, exchange))
                 .block();
     }
 
     @Override
-    public DepositResult deposit(ExchangeRequest requested) {
-        return clientMapper.getDepositClient(requested.getDirection())
-                .requestDeposit(requested)
-                .map(AccountTransactionAdapter::toDepositResult)
+    public Withdrawal withdraw(ExchangeRequest exchange) {
+        return clientMapper.getWithdrawalClient(exchange.getDirection())
+                .requestWithdrawal(exchange)
+                .map(response -> toWithdrawal(response, exchange))
                 .block();
     }
 
     @Override
-    public WithdrawalResult withdraw(ExchangeRequest requested) {
-        return clientMapper.getWithdrawalClient(requested.getDirection())
-                .requestWithdrawal(requested)
-                .map(AccountTransactionAdapter::toWithdrawalResult)
+    public Withdrawal loadWithdrawal(ExchangeRequest exchange) {
+        return clientMapper.getWithdrawalResultClient(exchange.getDirection())
+                .loadWithdrawalResult(exchange.getExchangeId())
+                .map(response -> toWithdrawal(response, exchange))
                 .block();
     }
 
-    private static DepositResult toDepositResult(TransactionResponse transactionResponse) {
-        return new DepositResult(
-                transactionResponse.success(),
-                new AccountCommandStatus(transactionResponse.status()),
-                (transactionResponse.transactionId() != null)
-                        ? new DepositId(transactionResponse.transactionId())
-                        : null
+    private static Deposit toDeposit(TransactionResponse transactionResponse, ExchangeRequest exchange) {
+        return Deposit.create(
+                (transactionResponse.transactionId() == null) ? null : new DepositId(transactionResponse.transactionId()),
+                exchange.getRequestId(),
+                exchange.getExchangeId(),
+                exchange.getUserId(),
+                exchange.getDirection(),
+                transactionResponse.success()
         );
     }
 
-    private static WithdrawalResult toWithdrawalResult(TransactionResponse transactionResponse) {
-        log.info("transaction response: {}", transactionResponse);
-        return new WithdrawalResult(
-                transactionResponse.success(),
-                new AccountCommandStatus(transactionResponse.status()),
-                (transactionResponse.transactionId() != null)
-                        ? new WithdrawalId(transactionResponse.transactionId())
-                        : null
+    private static Withdrawal toWithdrawal(TransactionResponse transactionResponse, ExchangeRequest exchange) {
+        return Withdrawal.create(
+                (transactionResponse.transactionId() == null) ? null : new WithdrawalId(transactionResponse.transactionId()),
+                exchange.getRequestId(),
+                exchange.getExchangeId(),
+                exchange.getUserId(),
+                exchange.getDirection(),
+                transactionResponse.success()
         );
     }
+
 
 }

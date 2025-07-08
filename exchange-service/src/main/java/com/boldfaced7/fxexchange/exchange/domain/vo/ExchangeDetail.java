@@ -1,20 +1,23 @@
 package com.boldfaced7.fxexchange.exchange.domain.vo;
 
+import com.boldfaced7.fxexchange.exchange.domain.model.Deposit;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
+import com.boldfaced7.fxexchange.exchange.domain.model.Withdrawal;
 
 public record ExchangeDetail(
         ExchangeRequest exchangeRequest,
-        WithdrawalResult withdrawalResult,
-        DepositResult depositResult
+        Withdrawal withdrawal,
+        Deposit deposit
 ) {
     public ExchangeDetail(
             WithdrawalDetail withdrawalDetail,
-            DepositDetail depositDetail
+            DepositDetail depositDetail,
+            ExchangeRequest exchangeRequest
     ) {
         this(
-                depositDetail.exchangeRequest(),
-                withdrawalDetail.withdrawalResult(),
-                depositDetail.depositResult()
+                exchangeRequest,
+                withdrawalDetail.withdrawal(),
+                depositDetail.deposit()
         );
     }
 }
