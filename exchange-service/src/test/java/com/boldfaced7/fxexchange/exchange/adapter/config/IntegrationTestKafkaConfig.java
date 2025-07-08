@@ -1,45 +1,33 @@
 package com.boldfaced7.fxexchange.exchange.adapter.config;
 
+import com.boldfaced7.fxexchange.exchange.adapter.out.property.KafkaExchangeProperties;
+import com.boldfaced7.fxexchange.exchange.adapter.out.property.KafkaFxAccountProperties;
+import com.boldfaced7.fxexchange.exchange.adapter.out.property.KafkaKrwAccountProperties;
+import com.boldfaced7.fxexchange.exchange.adapter.out.property.KafkaSchedulerProperties;
+import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 
-@Profile("integration-test")
-@TestConfiguration
+@Profile("!application-test")
+@Configuration
+@RequiredArgsConstructor
 public class IntegrationTestKafkaConfig {
 
-    @Value("${kafka.topic.scheduler.scheduler-topic}")
-    private String schedulerTopic;
-
-    @Value("${kafka.topic.exchange.deposit-check-topic}")
-    private String depositCheckTopic;
-
-    @Value("${kafka.topic.exchange.withdrawal-check-topic}")
-    private String withdrawalCheckTopic;
-
-    @Value("${kafka.topic.fx-account.withdrawal-cancel-request-topic}")
-    private String fxWithdrawalCancelRequestTopic;
-
-    @Value("${kafka.topic.krw-account.withdrawal-cancel-request-topic}")
-    private String krwWithdrawalCancelRequestTopic;
-
-    @Value("${kafka.topic.fx-account.withdrawal-cancel-response-topic}")
-    private String fxWithdrawalCancelResponseTopic;
-
-    @Value("${kafka.topic.krw-account.withdrawal-cancel-response-topic}")
-    private String krwWithdrawalCancelResponseTopic;
-
+    private final KafkaExchangeProperties exchange;
+    private final KafkaFxAccountProperties fxAccount;
+    private final KafkaKrwAccountProperties krwAccount;
+    private final KafkaSchedulerProperties scheduler;
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(
-            ConsumerFactory<String, String> consumerFactory) {
-
+            ConsumerFactory<String, String> consumerFactory
+    ) {
         var factory = new ConcurrentKafkaListenerContainerFactory<String, String>();
         factory.setConsumerFactory(consumerFactory);
 
@@ -53,7 +41,7 @@ public class IntegrationTestKafkaConfig {
 
     @Bean
     public NewTopic schedulerTopic() {
-        return TopicBuilder.name(schedulerTopic)
+        return TopicBuilder.name(scheduler.schedulerTopic())
                 .partitions(1)
                 .replicas(1)
                 .build();
@@ -61,7 +49,7 @@ public class IntegrationTestKafkaConfig {
 
     @Bean
     public NewTopic depositCheckTopic() {
-        return TopicBuilder.name(depositCheckTopic)
+        return TopicBuilder.name(exchange.depositCheckTopic())
                 .partitions(1)
                 .replicas(1)
                 .build();
@@ -69,7 +57,7 @@ public class IntegrationTestKafkaConfig {
 
     @Bean
     public NewTopic withdrawalCheckTopic() {
-        return TopicBuilder.name(withdrawalCheckTopic)
+        return TopicBuilder.name(exchange.withdrawalCheckTopic())
                 .partitions(1)
                 .replicas(1)
                 .build();
@@ -77,7 +65,7 @@ public class IntegrationTestKafkaConfig {
 
     @Bean
     public NewTopic fxWithdrawalCancelRequestTopic() {
-        return TopicBuilder.name(fxWithdrawalCancelRequestTopic)
+        return TopicBuilder.name(fxAccount.withdrawalCancelRequestTopic())
                 .partitions(1)
                 .replicas(1)
                 .build();
@@ -85,7 +73,7 @@ public class IntegrationTestKafkaConfig {
 
     @Bean
     public NewTopic krwWithdrawalCancelRequestTopic() {
-        return TopicBuilder.name(krwWithdrawalCancelRequestTopic)
+        return TopicBuilder.name(krwAccount.withdrawalCancelRequestTopic())
                 .partitions(1)
                 .replicas(1)
                 .build();
@@ -93,7 +81,7 @@ public class IntegrationTestKafkaConfig {
 
     @Bean
     public NewTopic fxWithdrawalCancelResponseTopic() {
-        return TopicBuilder.name(fxWithdrawalCancelResponseTopic)
+        return TopicBuilder.name(fxAccount.withdrawalCancelResponseTopic())
                 .partitions(1)
                 .replicas(1)
                 .build();
@@ -101,7 +89,7 @@ public class IntegrationTestKafkaConfig {
 
     @Bean
     public NewTopic krwWithdrawalCancelResponseTopic() {
-        return TopicBuilder.name(krwWithdrawalCancelResponseTopic)
+        return TopicBuilder.name(krwAccount.withdrawalCancelResponseTopic())
                 .partitions(1)
                 .replicas(1)
                 .build();
