@@ -83,13 +83,13 @@ sequenceDiagram
 
 | 상태                        | 설명                                 | 다음 가능 상태                                      |
 |-----------------------------|--------------------------------------|-----------------------------------------------------|
-| EXCHANGE_CURRENCY_STARTED   | 환전 요청 접수                       | WITHDRAWAL_SUCCEEDED, CHECKING_WITHDRAWAL_REQUIRED, EXCHANGE_CURRENCY_FAILED |
-| CHECKING_WITHDRAWAL_REQUIRED| 출금 처리 중 (결과 모름)             | WITHDRAWAL_SUCCEEDED, EXCHANGE_CURRENCY_FAILED      |
-| WITHDRAWAL_SUCCEEDED        | 출금 완료                            | EXCHANGE_CURRENCY_SUCCEEDED, CHECKING_DEPOSIT_REQUIRED, CANCELING_WITHDRAWAL_REQUIRED |
-| CHECKING_DEPOSIT_REQUIRED   | 입금 처리 중 (결과 모름)             | EXCHANGE_CURRENCY_SUCCEEDED, CANCELING_WITHDRAWAL_REQUIRED |
-| EXCHANGE_CURRENCY_SUCCEEDED | 환전 완료                            | -                                                   |
-| CANCELING_WITHDRAWAL_REQUIRED | 환전 취소 (롤백)                   | -                                                   |
-| EXCHANGE_CURRENCY_FAILED    | 환전 실패                            | -                                                   |
+| `XCHANGE_CURRENCY_STARTED`   | 환전 요청 접수                       | `WITHDRAWAL_SUCCEEDED`, `CHECKING_WITHDRAWAL_REQUIRED`, `EXCHANGE_CURRENCY_FAILED` |
+| `CHECKING_WITHDRAWAL_REQUIRED`| 출금 처리 중 (결과 모름)             | `WITHDRAWAL_SUCCEEDED`, `EXCHANGE_CURRENCY_FAILED`      |
+| `WITHDRAWAL_SUCCEEDED`        | 출금 완료                            | `EXCHANGE_CURRENCY_SUCCEEDED`, `CHECKING_DEPOSIT_REQUIRED`, `CANCELING_WITHDRAWAL_REQUIRED` |
+| `CHECKING_DEPOSIT_REQUIRED`   | 입금 처리 중 (결과 모름)             | `EXCHANGE_CURRENCY_SUCCEEDED`, `CANCELING_WITHDRAWAL_REQUIRED` |
+| `EXCHANGE_CURRENCY_SUCCEEDED` | 환전 완료                            | -                                                   |
+| `CANCELING_WITHDRAWAL_REQUIRED` | 환전 취소 (롤백)                   | -                                                   |
+| `EXCHANGE_CURRENCY_FAILED`    | 환전 실패                            | -                                                   |
 
 ---
 
@@ -136,4 +136,8 @@ sequenceDiagram
 ---
 
 ## 상세 시나리오
-더 자세한 시나리오와 시퀀스 다이어그램은 [docs/sequence-diagrams.md](./docs/SEQUENCE-DIAGRAMS.md)를 참조하세요. 
+- [API_SPEC.md](./docs/API_SPEC.md)
+- [CLASS_DIAGRAM.md](./docs/CLASS_DIAGRAM.md)
+- [CONCURRENCY-ISSUE.md](./docs/CONCURRENCY-ISSUE.md)
+- [FLOWCHART.md](./docs/FLOWCHART.md)
+- [SEQUENCE-DIAGRAMS.md](./docs/SEQUENCE-DIAGRAMS.md)
