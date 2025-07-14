@@ -136,8 +136,8 @@ sequenceDiagram
 ---
 
 ## 상세 시나리오
+- [FLOWCHART.md](./docs/FLOWCHART.md)
+- [SEQUENCE-DIAGRAMS.md](./docs/SEQUENCE-DIAGRAMS.md)
 - [API_SPEC.md](./docs/API_SPEC.md)
 - [CLASS_DIAGRAM.md](./docs/CLASS_DIAGRAM.md)
 - [CONCURRENCY-ISSUE.md](./docs/CONCURRENCY-ISSUE.md)
-- [FLOWCHART.md](./docs/FLOWCHART.md)
-- [SEQUENCE-DIAGRAMS.md](./docs/SEQUENCE-DIAGRAMS.md)
