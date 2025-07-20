@@ -6,8 +6,8 @@ import com.boldfaced7.fxexchange.exchange.application.port.out.deposit.SaveDepos
 import com.boldfaced7.fxexchange.exchange.application.port.out.event.PublishEventPort;
 import com.boldfaced7.fxexchange.exchange.domain.model.Deposit;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
-import com.boldfaced7.fxexchange.exchange.domain.vo.DepositDetail;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.Count;
+import com.boldfaced7.fxexchange.exchange.domain.vo.deposit.DepositDetail;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

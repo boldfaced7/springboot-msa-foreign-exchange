@@ -8,6 +8,7 @@ import com.boldfaced7.fxexchange.exchange.adapter.in.messaging.WithdrawalCheckKa
 import com.boldfaced7.fxexchange.exchange.adapter.out.cache.RedisExchangeIdIndexRepository;
 import com.boldfaced7.fxexchange.exchange.adapter.out.cache.RedisExchangeRequestRepository;
 import com.boldfaced7.fxexchange.exchange.adapter.out.property.*;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.awaitility.Awaitility;
@@ -57,10 +58,12 @@ public class ApplicationTestSupport {
     @MockitoBean RedisConnectionFactory redisConnectionFactory;
     @MockitoBean RedissonClient redissonClient;
 
-    @MockitoBean WebClient fxDepositWebClient;
-    @MockitoBean WebClient krwWithdrawalWebClient;
-    @MockitoBean WebClient fxWithdrawalWebClient;
-    @MockitoBean WebClient krwDepositWebClient;
+    @MockitoBean(name = "fxWebClient")  WebClient fxWebClient;
+    @MockitoBean(name = "krwWebClient") WebClient krwlWebClient;
+
+    @MockitoBean(name = "fxCircuitBreaker") CircuitBreaker fxCircuitBreaker;
+    @MockitoBean(name = "krwCircuitBreaker") CircuitBreaker krwCircuitBreaker;
+
 
     @MockitoBean KafkaAdmin kafkaAdmin;
     @MockitoBean ProducerFactory<String, String> producerFactory;

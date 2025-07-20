@@ -7,7 +7,7 @@ import com.boldfaced7.fxexchange.exchange.application.port.out.withdrawal.SaveWi
 import com.boldfaced7.fxexchange.exchange.domain.exception.ExchangeRequestNotFoundException;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
 import com.boldfaced7.fxexchange.exchange.domain.model.Withdrawal;
-import com.boldfaced7.fxexchange.exchange.domain.vo.RetryPolicy;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RetryPolicy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
