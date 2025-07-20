@@ -5,12 +5,12 @@ import com.boldfaced7.fxexchange.exchange.application.port.out.deposit.LoadDepos
 import com.boldfaced7.fxexchange.exchange.application.port.out.deposit.SaveDepositPort;
 import com.boldfaced7.fxexchange.exchange.application.port.out.event.PublishEventPort;
 import com.boldfaced7.fxexchange.exchange.application.service.saga.deposit.CheckDepositService;
-import com.boldfaced7.fxexchange.exchange.domain.vo.RetryPolicy;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RetryPolicy;
 import com.boldfaced7.fxexchange.exchange.domain.exception.ExchangeRequestNotFoundException;
 import com.boldfaced7.fxexchange.exchange.domain.model.Deposit;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
-import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.Count;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

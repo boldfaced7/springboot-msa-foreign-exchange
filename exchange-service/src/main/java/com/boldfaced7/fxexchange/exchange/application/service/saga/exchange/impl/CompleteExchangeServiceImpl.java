@@ -7,7 +7,7 @@ import com.boldfaced7.fxexchange.exchange.application.port.out.exchange.UpdateEx
 import com.boldfaced7.fxexchange.exchange.application.service.saga.exchange.CompleteExchangeService;
 import com.boldfaced7.fxexchange.exchange.domain.exception.ExchangeRequestNotFoundException;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -20,6 +20,14 @@ public class CompleteExchangeServiceImpl implements CompleteExchangeService {
     private final LoadExchangeRequestPort loadExchangeRequestPort;
     private final UpdateExchangeRequestPort updateExchangeRequestPort;
     private final PublishEventPort publishEventPort;
+
+    @Override
+    @DistributedLock(prefix = "order:lock:", key = "#exchangeRequest.requestId")
+    @Transactional
+    public ExchangeRequest succeedExchange(ExchangeRequest exchangeRequest) {
+        publishExchangeEvent(exchangeRequest, true);
+        return updateExchangeRequestPort.update(exchangeRequest);
+    }
 
     @Override
     @DistributedLock(prefix = "order:lock:", key = "#requestId")

@@ -1,6 +1,6 @@
 package com.boldfaced7.fxexchange.exchange.application.port.in;
 
-import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import java.time.LocalDateTime;
 

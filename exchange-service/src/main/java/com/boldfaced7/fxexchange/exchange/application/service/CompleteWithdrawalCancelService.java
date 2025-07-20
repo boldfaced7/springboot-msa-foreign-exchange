@@ -9,7 +9,7 @@ import com.boldfaced7.fxexchange.exchange.application.port.out.event.PublishEven
 import com.boldfaced7.fxexchange.exchange.domain.exception.ExchangeRequestNotFoundException;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
 import com.boldfaced7.fxexchange.exchange.domain.model.WithdrawalCancel;
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.ExchangeId;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
