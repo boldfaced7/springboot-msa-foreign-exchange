@@ -1,7 +1,7 @@
 package com.boldfaced7.fxexchange.exchange.domain.exception;
 
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
-import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.ExchangeId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
 
 public class ExchangeRequestNotFoundException extends RuntimeException {
     public ExchangeRequestNotFoundException(RequestId requestId) {

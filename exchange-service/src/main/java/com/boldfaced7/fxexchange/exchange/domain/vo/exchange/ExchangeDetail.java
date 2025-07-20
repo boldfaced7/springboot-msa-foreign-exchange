@@ -1,8 +1,10 @@
-package com.boldfaced7.fxexchange.exchange.domain.vo;
+package com.boldfaced7.fxexchange.exchange.domain.vo.exchange;
 
 import com.boldfaced7.fxexchange.exchange.domain.model.Deposit;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
 import com.boldfaced7.fxexchange.exchange.domain.model.Withdrawal;
+import com.boldfaced7.fxexchange.exchange.domain.vo.deposit.DepositDetail;
+import com.boldfaced7.fxexchange.exchange.domain.vo.withdrawal.WithdrawalDetail;
 
 public record ExchangeDetail(
         ExchangeRequest exchangeRequest,

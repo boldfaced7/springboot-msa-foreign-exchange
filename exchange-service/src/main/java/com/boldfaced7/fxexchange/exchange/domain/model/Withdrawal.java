@@ -5,8 +5,12 @@ import com.boldfaced7.fxexchange.exchange.domain.event.withdrawal.WithdrawalFail
 import com.boldfaced7.fxexchange.exchange.domain.event.withdrawal.WithdrawalFailureChecked;
 import com.boldfaced7.fxexchange.exchange.domain.event.withdrawal.WithdrawalSucceeded;
 import com.boldfaced7.fxexchange.exchange.domain.event.withdrawal.WithdrawalSuccessChecked;
-import com.boldfaced7.fxexchange.exchange.domain.vo.*;
 
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.ExchangeId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.UserId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.withdrawal.WithdrawalId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.withdrawal.Withdrawn;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

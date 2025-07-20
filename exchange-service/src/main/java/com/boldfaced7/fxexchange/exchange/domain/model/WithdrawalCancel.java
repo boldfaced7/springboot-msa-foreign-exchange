@@ -2,10 +2,14 @@ package com.boldfaced7.fxexchange.exchange.domain.model;
 
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.event.cancel.WithdrawalCancelSucceeded;
-import com.boldfaced7.fxexchange.exchange.domain.vo.*;
 
 import java.time.LocalDateTime;
 
+import com.boldfaced7.fxexchange.exchange.domain.vo.cancel.WithdrawalCancelId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.cancel.WithdrawalCancelled;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.ExchangeId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.UserId;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

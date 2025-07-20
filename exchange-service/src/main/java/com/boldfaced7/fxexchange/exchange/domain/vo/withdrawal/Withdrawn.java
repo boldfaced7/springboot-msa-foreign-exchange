@@ -1,4 +1,4 @@
-package com.boldfaced7.fxexchange.exchange.domain.vo;
+package com.boldfaced7.fxexchange.exchange.domain.vo.withdrawal;
 
 public record Withdrawn(boolean value) {
     public static final Withdrawn WITHDRAWN = new Withdrawn(true);

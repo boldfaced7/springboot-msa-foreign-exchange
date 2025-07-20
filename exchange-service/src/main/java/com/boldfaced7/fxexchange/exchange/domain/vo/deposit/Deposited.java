@@ -1,4 +1,4 @@
-package com.boldfaced7.fxexchange.exchange.domain.vo;
+package com.boldfaced7.fxexchange.exchange.domain.vo.deposit;
 
 public record Deposited(boolean value) {
     public static final Deposited DEPOSITED = new Deposited(true);

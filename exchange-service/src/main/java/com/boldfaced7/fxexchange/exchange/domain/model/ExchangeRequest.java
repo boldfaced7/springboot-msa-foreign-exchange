@@ -4,7 +4,8 @@ import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.event.deposit.*;
 import com.boldfaced7.fxexchange.exchange.domain.event.exchange.*;
 import com.boldfaced7.fxexchange.exchange.domain.event.withdrawal.*;
-import com.boldfaced7.fxexchange.exchange.domain.vo.*;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,7 +30,7 @@ public class ExchangeRequest extends EventDomain {
     private QuoteAmount quoteAmount;               // 원화 금액
     private ExchangeRate exchangeRate;             // 적용된 환율
     
-    private ExchangeFinished exchangeFinished;
+    private Exchanged exchanged;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -53,7 +54,7 @@ public class ExchangeRequest extends EventDomain {
                 baseAmount,
                 quoteAmount,
                 exchangeRate,
-                ExchangeFinished.NOT_FINISHED,
+                Exchanged.NOT_FINISHED,
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
@@ -69,7 +70,7 @@ public class ExchangeRequest extends EventDomain {
         BaseAmount baseAmount,
         QuoteAmount quoteAmount,
         ExchangeRate exchangeRate,
-        ExchangeFinished exchangeFinished,
+        Exchanged exchanged,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
     ) {
@@ -83,18 +84,18 @@ public class ExchangeRequest extends EventDomain {
                 baseAmount,
                 quoteAmount,
                 exchangeRate,
-                exchangeFinished,
+                exchanged,
                 createdAt,
                 updatedAt
         );
     }
 
     public boolean isFinished() {
-        return exchangeFinished.value();
+        return exchanged.value();
     }
 
     public void completeExchange(boolean isSucceeded) {
-        this.exchangeFinished = new ExchangeFinished(true);
+        this.exchanged = new Exchanged(true);
 
         if (isSucceeded) {
             this.markExchangeCurrencySucceeded();

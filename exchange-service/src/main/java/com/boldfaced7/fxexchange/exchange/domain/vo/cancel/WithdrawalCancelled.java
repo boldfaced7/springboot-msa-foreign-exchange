@@ -1,4 +1,4 @@
-package com.boldfaced7.fxexchange.exchange.domain.vo;
+package com.boldfaced7.fxexchange.exchange.domain.vo.cancel;
 
 public record WithdrawalCancelled(boolean value) {
     public static final WithdrawalCancelled CANCELLED = new WithdrawalCancelled(true);
