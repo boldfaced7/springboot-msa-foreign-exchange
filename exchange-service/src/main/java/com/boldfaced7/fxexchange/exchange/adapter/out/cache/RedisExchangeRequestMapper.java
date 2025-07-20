@@ -1,7 +1,8 @@
 package com.boldfaced7.fxexchange.exchange.adapter.out.cache;
 
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.*;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.*;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -24,7 +25,7 @@ public class RedisExchangeRequestMapper {
                 new QuoteAmount(redis.getQuoteAmount()),
                 new ExchangeRate(redis.getExchangeRate()),
 
-                new ExchangeFinished(redis.isFinished()),
+                new Exchanged(redis.isFinished()),
                 LocalDateTime.parse(redis.getCreatedAt()),
                 LocalDateTime.parse(redis.getUpdatedAt())
         );
@@ -36,7 +37,7 @@ public class RedisExchangeRequestMapper {
         if (domain == null) return Optional.empty();
 
         var converted = new RedisExchangeRequest(
-                (domain.getRequestId() == null) ? null : domain.getRequestId().toString(),
+                (domain.getRequestId() == null) ? null : domain.getRequestId().value().toString(),
                 domain.getExchangeId().value(),
                 domain.getUserId().value(),
 

@@ -4,8 +4,8 @@ import com.boldfaced7.fxexchange.exchange.application.port.out.cache.DeleteExcha
 import com.boldfaced7.fxexchange.exchange.application.port.out.cache.LoadExchangeRequestCachePort;
 import com.boldfaced7.fxexchange.exchange.application.port.out.cache.SaveExchangeRequestCachePort;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
-import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.ExchangeId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ public class RedisExchangeRequestCacheAdapter implements
 
     @Override
     public Optional<ExchangeRequest> loadByRequestId(RequestId requestId) {
-        return exchangeRequestRepository.findById(requestId.toString())
+        return exchangeRequestRepository.findById(requestId.value().toString())
                 .flatMap(RedisExchangeRequestMapper::toDomain);
     }
 
@@ -52,6 +52,6 @@ public class RedisExchangeRequestCacheAdapter implements
         RedisExchangeRequestMapper.toRedis(exchangeRequest)
                 .map(exchangeRequestRepository::save)
                 .ifPresent(exchangeIdIndexRepository::save);
-        log.info("Redis saved: {}", exchangeRequest);
+        log.info("ExchangeRequest cached: {}", exchangeRequest);
     }
 }

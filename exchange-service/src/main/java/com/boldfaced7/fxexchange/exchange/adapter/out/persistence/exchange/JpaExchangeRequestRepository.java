@@ -9,12 +9,14 @@ import org.springframework.data.jpa.repository.QueryHints;
 
 import java.util.Optional;
 
-public interface ExchangeRequestJpaRepository extends JpaRepository<ExchangeRequestJpa, Long> {
+public interface JpaExchangeRequestRepository extends JpaRepository<JpaExchangeRequest, Long> {
+
+    Optional<JpaExchangeRequest> findByExchangeId(String exchangeId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT e FROM ExchangeRequestJpa e WHERE e.exchangeRequestId = :requestId")
+    @Query("SELECT e FROM JpaExchangeRequest e WHERE e.requestId = :requestId")
     @QueryHints(
             @QueryHint(name = "jakarta.persistence.lock.timeout", value = "1000")
     )
-    Optional<ExchangeRequestJpa> findByRequestIdForUpdate(Long requestId);
+    Optional<JpaExchangeRequest> findByRequestIdForUpdate(Long requestId);
 }

@@ -2,8 +2,8 @@ package com.boldfaced7.fxexchange.exchange.adapter.out.external.warning;
 
 import com.boldfaced7.fxexchange.common.ExternalSystemAdapter;
 import com.boldfaced7.fxexchange.exchange.application.port.out.external.SendWarningMessagePort;
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
-import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.ExchangeId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
 import lombok.RequiredArgsConstructor;
 
 @ExternalSystemAdapter

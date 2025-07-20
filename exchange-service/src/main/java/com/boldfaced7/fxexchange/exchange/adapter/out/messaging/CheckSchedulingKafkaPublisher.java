@@ -7,8 +7,8 @@ import com.boldfaced7.fxexchange.exchange.adapter.out.property.KafkaSchedulerPro
 import com.boldfaced7.fxexchange.exchange.application.port.out.external.ScheduleCheckRequestPort;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.enums.TransactionType;
-import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.Count;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.ExchangeId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;

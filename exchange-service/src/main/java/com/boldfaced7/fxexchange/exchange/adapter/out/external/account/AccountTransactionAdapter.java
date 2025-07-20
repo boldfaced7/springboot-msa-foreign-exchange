@@ -7,8 +7,8 @@ import com.boldfaced7.fxexchange.exchange.application.port.out.withdrawal.Reques
 import com.boldfaced7.fxexchange.exchange.domain.model.Deposit;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
 import com.boldfaced7.fxexchange.exchange.domain.model.Withdrawal;
-import com.boldfaced7.fxexchange.exchange.domain.vo.DepositId;
-import com.boldfaced7.fxexchange.exchange.domain.vo.WithdrawalId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.deposit.DepositId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.withdrawal.WithdrawalId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

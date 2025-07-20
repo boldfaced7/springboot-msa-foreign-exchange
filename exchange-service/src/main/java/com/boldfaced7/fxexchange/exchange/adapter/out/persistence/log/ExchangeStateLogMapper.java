@@ -1,12 +1,12 @@
 package com.boldfaced7.fxexchange.exchange.adapter.out.persistence.log;
 
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeStateLog;
-import com.boldfaced7.fxexchange.exchange.domain.vo.LogId;
-import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.log.LogId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
 
 public class ExchangeStateLogMapper {
-    public static ExchangeStateLogJpa toJpa(ExchangeStateLog exchangeStateLog) {
-        return new ExchangeStateLogJpa(
+    public static JpaExchangeStateLog toJpa(ExchangeStateLog exchangeStateLog) {
+        return new JpaExchangeStateLog(
                 (exchangeStateLog.getLogId() == null) ? null : exchangeStateLog.getLogId().value(),
                 exchangeStateLog.getRequestId().value(),
                 exchangeStateLog.getDirection(),
@@ -15,13 +15,13 @@ public class ExchangeStateLogMapper {
         );
     }
 
-    public static ExchangeStateLog toDomain(ExchangeStateLogJpa exchangeStateLogJpa) {
+    public static ExchangeStateLog toDomain(JpaExchangeStateLog jpaExchangeStateLog) {
         return ExchangeStateLog.of(
-                (exchangeStateLogJpa.getLogId() == null) ? null : new LogId(exchangeStateLogJpa.getLogId()),
-                new RequestId(exchangeStateLogJpa.getRequestId()),
-                exchangeStateLogJpa.getDirection(),
-                exchangeStateLogJpa.getState(),
-                exchangeStateLogJpa.getRaisedAt()
+                (jpaExchangeStateLog.getLogId() == null) ? null : new LogId(jpaExchangeStateLog.getLogId()),
+                new RequestId(jpaExchangeStateLog.getRequestId()),
+                jpaExchangeStateLog.getDirection(),
+                jpaExchangeStateLog.getState(),
+                jpaExchangeStateLog.getRaisedAt()
         );
     }
 }
