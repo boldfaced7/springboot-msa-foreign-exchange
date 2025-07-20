@@ -9,13 +9,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ExchangeStateLogPersistenceAdapter implements SaveExchangeStateLogPort {
 
-    private final ExchangeStateLogJpaRepository exchangeStateLogJpaRepository;
+    private final JpaExchangeStateLogRepository jpaExchangeStateLogRepository;
 
 
     @Override
     public ExchangeStateLog save(ExchangeStateLog exchangeStateLog) {
-        ExchangeStateLogJpa toBeSaved = ExchangeStateLogMapper.toJpa(exchangeStateLog);
-        ExchangeStateLogJpa savedJpa = exchangeStateLogJpaRepository.save(toBeSaved);
+        JpaExchangeStateLog toBeSaved = ExchangeStateLogMapper.toJpa(exchangeStateLog);
+        JpaExchangeStateLog savedJpa = jpaExchangeStateLogRepository.save(toBeSaved);
         return ExchangeStateLogMapper.toDomain(savedJpa);
     }
 }

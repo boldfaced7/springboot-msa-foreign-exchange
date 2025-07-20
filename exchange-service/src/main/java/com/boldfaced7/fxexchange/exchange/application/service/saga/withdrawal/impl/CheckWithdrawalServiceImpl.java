@@ -8,9 +8,9 @@ import com.boldfaced7.fxexchange.exchange.application.service.saga.withdrawal.Ch
 import com.boldfaced7.fxexchange.exchange.domain.exception.ExchangeRequestNotFoundException;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
 import com.boldfaced7.fxexchange.exchange.domain.model.Withdrawal;
-import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
-import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
-import com.boldfaced7.fxexchange.exchange.domain.vo.RetryPolicy;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.Count;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RetryPolicy;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

@@ -7,8 +7,8 @@ import com.boldfaced7.fxexchange.exchange.application.port.out.withdrawal.SaveWi
 import com.boldfaced7.fxexchange.exchange.application.service.saga.withdrawal.WithdrawService;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
 import com.boldfaced7.fxexchange.exchange.domain.model.Withdrawal;
-import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
-import com.boldfaced7.fxexchange.exchange.domain.vo.WithdrawalDetail;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.Count;
+import com.boldfaced7.fxexchange.exchange.domain.vo.withdrawal.WithdrawalDetail;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -2,8 +2,6 @@ spring:
   application:
     name: exchange-service
 
-
-
   datasource:
     url: jdbc:mysql://localhost:3306/exchange_db?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
     username: root
@@ -56,6 +54,47 @@ spring:
       session-timeout-ms: 10000
       heartbeat-interval-ms: 3000
 
+# Resilience4J 설정 (Circuit Breaker만)
+resilience4j:
+  circuitbreaker:
+    instances:
+      fxCircuitBreaker:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        record-exceptions:
+          - org.springframework.web.reactive.function.client.WebClientResponseException
+          - org.springframework.web.reactive.function.client.WebClientRequestException
+          - java.util.concurrent.TimeoutException
+      krwCircuitBreaker:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        record-exceptions:
+          - org.springframework.web.reactive.function.client.WebClientResponseException
+          - org.springframework.web.reactive.function.client.WebClientRequestException
+          - java.util.concurrent.TimeoutException
+
+# Actuator 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,circuitbreakers
+  endpoint:
+    health:
+      show-details: always
+    circuitbreakers:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
 server:
   port: 8081
 
@@ -63,7 +102,7 @@ logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-
+    io.github.resilience4j: DEBUG
 
 kafka:
   exchange:

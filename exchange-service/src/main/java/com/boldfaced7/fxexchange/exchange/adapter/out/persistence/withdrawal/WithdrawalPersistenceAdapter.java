@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class WithdrawalPersistenceAdapter implements SaveWithdrawalPort {
-    private final WithdrawalJpaRepository withdrawalJpaRepository;
+    private final JpaWithdrawalRepository jpaWithdrawalRepository;
 
     @Override
     public void saveWithdrawal(Withdrawal withdrawal) {
-        withdrawalJpaRepository.save(WithdrawalMapper.toJpa(withdrawal));
+        jpaWithdrawalRepository.save(WithdrawalMapper.toJpa(withdrawal));
     }
     
 }

@@ -2,9 +2,9 @@ package com.boldfaced7.fxexchange.exchange.domain.event.withdrawal;
 
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.event.DomainEvent;
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
-import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
-import com.boldfaced7.fxexchange.exchange.domain.vo.WithdrawalId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.ExchangeId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.withdrawal.WithdrawalId;
 
 import java.time.LocalDateTime;
 

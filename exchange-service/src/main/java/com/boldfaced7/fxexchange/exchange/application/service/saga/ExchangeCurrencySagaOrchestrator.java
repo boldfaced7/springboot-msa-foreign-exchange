@@ -4,7 +4,7 @@ import com.boldfaced7.fxexchange.exchange.domain.event.cancel.WithdrawalCancelSu
 import com.boldfaced7.fxexchange.exchange.domain.event.deposit.*;
 import com.boldfaced7.fxexchange.exchange.domain.event.withdrawal.*;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeDetail;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.ExchangeDetail;
 
 public interface ExchangeCurrencySagaOrchestrator {
     ExchangeDetail startExchange(ExchangeRequest exchange);

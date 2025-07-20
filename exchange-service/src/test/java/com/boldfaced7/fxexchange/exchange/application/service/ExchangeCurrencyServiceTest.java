@@ -1,10 +1,8 @@
 package com.boldfaced7.fxexchange.exchange.application.service;
 
-import com.boldfaced7.fxexchange.exchange.application.port.out.event.PublishEventPort;
-import com.boldfaced7.fxexchange.exchange.application.port.out.exchange.SaveExchangeRequestPort;
 import com.boldfaced7.fxexchange.exchange.application.service.saga.ExchangeCurrencySagaOrchestrator;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeDetail;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.ExchangeDetail;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,21 +21,14 @@ class ExchangeCurrencyServiceTest {
 
     @InjectMocks ExchangeCurrencyService exchangeCurrencyService;
 
-    @Mock SaveExchangeRequestPort saveExchangeRequestPort;
-    @Mock PublishEventPort publishEventPort;
     @Mock ExchangeCurrencySagaOrchestrator exchangeCurrencySagaOrchestrator;
-    @Mock ExchangeRequest savedExchange;
-
-    ExchangeDetail expectedExchangeDetail = new ExchangeDetail(savedExchange, null, null);
 
     @Test
     @DisplayName("환전 요청이 성공적으로 처리된다")
     void exchangeCurrency_success() {
         // Given
-        when(saveExchangeRequestPort.save(any(ExchangeRequest.class)))
-                .thenReturn(savedExchange);
-        when(exchangeCurrencySagaOrchestrator.startExchange(savedExchange))
-                .thenReturn(expectedExchangeDetail);
+        when(exchangeCurrencySagaOrchestrator.startExchange(any(ExchangeRequest.class)))
+                .thenReturn(new ExchangeDetail((ExchangeRequest) null, null, null));
 
         // When
         ExchangeDetail result = exchangeCurrencyService
@@ -46,10 +37,8 @@ class ExchangeCurrencyServiceTest {
         // Then
         assertNotNull(result);
 
-        verify(saveExchangeRequestPort).save(any(ExchangeRequest.class));
-        verify(savedExchange).markExchangeCurrencyStarted();
-        verify(publishEventPort).publish(savedExchange);
-        verify(exchangeCurrencySagaOrchestrator).startExchange(savedExchange);
+        verify(exchangeCurrencySagaOrchestrator)
+                .startExchange(any(ExchangeRequest.class));
 
     }
 } 

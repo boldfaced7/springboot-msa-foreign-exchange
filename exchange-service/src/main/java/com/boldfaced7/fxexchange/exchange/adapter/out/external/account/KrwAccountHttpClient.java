@@ -2,14 +2,13 @@ package com.boldfaced7.fxexchange.exchange.adapter.out.external.account;
 
 import com.boldfaced7.fxexchange.common.ExternalSystemAdapter;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.ExchangeId;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
+import java.util.function.Function;
 
 @Slf4j
 @ExternalSystemAdapter
@@ -17,75 +16,86 @@ public class KrwAccountHttpClient implements
         LoadTransactionClient,
         RequestTransactionClient
 {
-
     private static final String DEPOSIT_PATH = "/api/v1/deposits";
     private static final String WITHDRAWAL_PATH = "/api/v1/withdrawals";
-    private static final Duration READ_TIMEOUT = Duration.ofSeconds(2);
-    private static final Duration WRITE_TIMEOUT = Duration.ofSeconds(2);
 
     private final WebClient webClient;
 
     public KrwAccountHttpClient(
-            @Qualifier("krwDepositWebClient") WebClient webClient
+            @Qualifier("krwWebClient") WebClient webClient
     ) {
         this.webClient = webClient;
     }
 
     @Override
     public Mono<TransactionResponse> loadDepositResult(ExchangeId exchangeId) {
-        return webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(DEPOSIT_PATH)
-                        .path("/{exchangeId}")
-                        .build(exchangeId.value()))
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(TransactionResponse.class)
-                .timeout(READ_TIMEOUT);
+        return loadTransactionResult(DEPOSIT_PATH, exchangeId);
     }
 
     @Override
     public Mono<TransactionResponse> loadWithdrawalResult(ExchangeId exchangeId) {
-        return webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(WITHDRAWAL_PATH)
-                        .path("/{exchangeId}")
-                        .build(exchangeId.value()))
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(TransactionResponse.class)
-                .timeout(READ_TIMEOUT);
-    }
-
-    @Override
-    public Mono<TransactionResponse> requestWithdrawal(ExchangeRequest exchangeRequest) {
-        return webClient.post()
-                .uri(WITHDRAWAL_PATH)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(new FxDepositRequest(exchangeRequest))
-                .retrieve()
-                .bodyToMono(TransactionResponse.class)
-                .timeout(WRITE_TIMEOUT);
+        return loadTransactionResult(WITHDRAWAL_PATH, exchangeId);
     }
 
     @Override
     public Mono<TransactionResponse> requestDeposit(ExchangeRequest exchangeRequest) {
-        return webClient.post()
-                .uri(DEPOSIT_PATH)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(new FxDepositRequest(exchangeRequest))
-                .retrieve()
-                .bodyToMono(TransactionResponse.class)
-                .timeout(WRITE_TIMEOUT);
+        return requestTransaction(DEPOSIT_PATH, exchangeRequest, KrwDepositRequest::new);
     }
 
-    private record FxDepositRequest(
+    @Override
+    public Mono<TransactionResponse> requestWithdrawal(ExchangeRequest exchangeRequest) {
+        return requestTransaction(WITHDRAWAL_PATH, exchangeRequest, KrwWithdrawalRequest::new);
+    }
+
+    private Mono<TransactionResponse> loadTransactionResult(String path, ExchangeId exchangeId) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(path)
+                        .path("/{exchangeId}")
+                        .build(exchangeId.value()))
+                .retrieve()
+                .bodyToMono(TransactionResponse.class)
+                .doOnSuccess(response -> log.info("원화 입출금 결과 조회({}/{}) 성공", path, exchangeId.value()))
+                .doOnError(error -> log.error("원화 입출금 결과 조회({}/{}) 실패", path, exchangeId.value(), error.getMessage()));
+    }
+
+    private <T> Mono<TransactionResponse> requestTransaction(
+            String path,
+            ExchangeRequest exchangeRequest,
+            Function<ExchangeRequest, T> constructor
+    ) {
+        return webClient.post()
+                .uri(path)
+                .bodyValue(constructor.apply(exchangeRequest))
+                .retrieve()
+                .bodyToMono(TransactionResponse.class)
+                .doOnSuccess(response -> log.info("원화 입출금 요청({}/{}) 성공", path, exchangeRequest.getExchangeId()))
+                .doOnError(error -> log.error("원화 입출금 요청({}/{}) 실패", path, exchangeRequest.getExchangeId(), error.getMessage()));
+    }
+
+    private record KrwDepositRequest(
             String exchangeId,
             String userId,
             String currency,
             int amount
     ) {
-        public FxDepositRequest(ExchangeRequest request) {
+        public KrwDepositRequest(ExchangeRequest request) {
+            this(
+                    request.getExchangeId().value(),
+                    request.getUserId().value(),
+                    request.getBaseCurrency().value().toString(),
+                    request.getBaseAmount().value()
+            );
+        }
+    }
+
+    private record KrwWithdrawalRequest(
+            String exchangeId,
+            String userId,
+            String currency,
+            int amount
+    ) {
+        public KrwWithdrawalRequest(ExchangeRequest request) {
             this(
                     request.getExchangeId().value(),
                     request.getUserId().value(),

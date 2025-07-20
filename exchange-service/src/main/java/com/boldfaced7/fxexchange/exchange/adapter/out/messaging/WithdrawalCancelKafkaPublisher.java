@@ -5,7 +5,7 @@ import com.boldfaced7.fxexchange.exchange.adapter.out.messaging.util.MessageSeri
 import com.boldfaced7.fxexchange.exchange.adapter.out.messaging.util.WithdrawalCancelTopicMapper;
 import com.boldfaced7.fxexchange.exchange.application.port.out.cancel.CancelWithdrawalPort;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.ExchangeId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;

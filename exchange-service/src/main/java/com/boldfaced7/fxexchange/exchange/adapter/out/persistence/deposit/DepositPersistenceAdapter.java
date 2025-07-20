@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class DepositPersistenceAdapter implements SaveDepositPort {
-    private final DepositJpaRepository depositJpaRepository;
+    private final JpaDepositRepository jpaDepositRepository;
 
     @Override
     public void saveDeposit(Deposit deposit) {
-        depositJpaRepository.save(DepositMapper.toJpa(deposit));
+        jpaDepositRepository.save(DepositMapper.toJpa(deposit));
     }
     
 }

@@ -7,8 +7,8 @@ import com.boldfaced7.fxexchange.exchange.application.port.out.event.PublishEven
 import com.boldfaced7.fxexchange.exchange.application.service.saga.deposit.DepositService;
 import com.boldfaced7.fxexchange.exchange.domain.model.Deposit;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
-import com.boldfaced7.fxexchange.exchange.domain.vo.DepositDetail;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.Count;
+import com.boldfaced7.fxexchange.exchange.domain.vo.deposit.DepositDetail;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

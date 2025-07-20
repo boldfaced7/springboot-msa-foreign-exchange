@@ -1,23 +1,23 @@
 package com.boldfaced7.fxexchange.exchange.application.service;
 
 import com.boldfaced7.fxexchange.exchange.adapter.out.cache.RedisExchangeRequestRepository;
-import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.cancel.withdrawal.WithdrawalCancelJpaRepository;
-import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.cancel.withdrawal.WithdrawalCancelMapper;
-import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.deposit.DepositJpaRepository;
+import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.cancel.JpaWithdrawalCancelRepository;
+import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.cancel.WithdrawalCancelMapper;
+import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.deposit.JpaDepositRepository;
 import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.deposit.DepositMapper;
-import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.exchange.ExchangeRequestJpaRepository;
+import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.exchange.JpaExchangeRequestRepository;
 import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.exchange.ExchangeRequestMapper;
-import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.log.ExchangeStateLogJpaRepository;
+import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.log.JpaExchangeStateLogRepository;
 import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.log.ExchangeStateLogMapper;
-import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.withdrawal.WithdrawalJpaRepository;
+import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.withdrawal.JpaWithdrawalRepository;
 import com.boldfaced7.fxexchange.exchange.adapter.out.persistence.withdrawal.WithdrawalMapper;
 import com.boldfaced7.fxexchange.exchange.application.util.TestContainerSupport;
 import com.boldfaced7.fxexchange.exchange.domain.enums.ExchangeState;
 import com.boldfaced7.fxexchange.exchange.domain.model.*;
-import com.boldfaced7.fxexchange.exchange.domain.vo.Deposited;
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeFinished;
-import com.boldfaced7.fxexchange.exchange.domain.vo.WithdrawalCancelled;
-import com.boldfaced7.fxexchange.exchange.domain.vo.Withdrawn;
+import com.boldfaced7.fxexchange.exchange.domain.vo.deposit.Deposited;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.Exchanged;
+import com.boldfaced7.fxexchange.exchange.domain.vo.cancel.WithdrawalCancelled;
+import com.boldfaced7.fxexchange.exchange.domain.vo.withdrawal.Withdrawn;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -72,11 +72,12 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
 
     @Autowired ExchangeCurrencyService exchangeCurrencyService;
 
-    @Autowired ExchangeRequestJpaRepository exchangeRequestJpaRepository;
-    @Autowired ExchangeStateLogJpaRepository exchangeStateLogJpaRepository;
-    @Autowired DepositJpaRepository depositJpaRepository;
-    @Autowired WithdrawalJpaRepository withdrawalJpaRepository;
-    @Autowired WithdrawalCancelJpaRepository withdrawalCancelJpaRepository;
+    @Autowired JpaExchangeRequestRepository jpaExchangeRequestRepository;
+    @Autowired JpaExchangeStateLogRepository jpaExchangeStateLogRepository;
+    @Autowired JpaDepositRepository jpaDepositRepository;
+    @Autowired JpaWithdrawalRepository jpaWithdrawalRepository;
+    @Autowired JpaWithdrawalCancelRepository jpaWithdrawalCancelRepository;
+
     @Autowired RedisExchangeRequestRepository redisExchangeRequestRepository;
     @Autowired RedisConnectionFactory redisConnectionFactory;
     @Autowired KafkaTemplate<String, String> kafkaTemplate;
@@ -85,11 +86,11 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
 
     @AfterEach
     void deleteAll() {
-        exchangeRequestJpaRepository.deleteAllInBatch();
-        exchangeStateLogJpaRepository.deleteAllInBatch();
-        depositJpaRepository.deleteAllInBatch();
-        withdrawalJpaRepository.deleteAllInBatch();
-        withdrawalCancelJpaRepository.deleteAllInBatch();
+        jpaExchangeRequestRepository.deleteAllInBatch();
+        jpaExchangeStateLogRepository.deleteAllInBatch();
+        jpaDepositRepository.deleteAllInBatch();
+        jpaWithdrawalRepository.deleteAllInBatch();
+        jpaWithdrawalCancelRepository.deleteAllInBatch();
         redisExchangeRequestRepository.deleteAll();
         redisConnectionFactory.getConnection().serverCommands().flushAll();
 
@@ -117,7 +118,7 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
 
         // Then
         assertModelsAndStates(
-                ExchangeFinished.FINISHED,
+                Exchanged.FINISHED,
                 Withdrawn.WITHDRAWN,
                 Deposited.DEPOSITED,
                 WithdrawalCancelled.NOT_CANCELLED,
@@ -142,7 +143,7 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
 
         // Then
         assertModelsAndStates(
-                ExchangeFinished.FINISHED,
+                Exchanged.FINISHED,
                 Withdrawn.WITHDRAWN,
                 Deposited.DEPOSITED,
                 WithdrawalCancelled.NOT_CANCELLED,
@@ -169,7 +170,7 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
 
         // Then
         assertModelsAndStates(
-                ExchangeFinished.FINISHED,
+                Exchanged.FINISHED,
                 Withdrawn.WITHDRAWN,
                 Deposited.DEPOSITED,
                 WithdrawalCancelled.NOT_CANCELLED,
@@ -195,7 +196,7 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
 
         // Then
         assertModelsAndStates(
-                ExchangeFinished.FINISHED,
+                Exchanged.FINISHED,
                 Withdrawn.WITHDRAWN,
                 Deposited.NOT_DEPOSITED,
                 WithdrawalCancelled.CANCELLED,
@@ -221,7 +222,7 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
 
         // Then
         assertModelsAndStates(
-                ExchangeFinished.FINISHED,
+                Exchanged.FINISHED,
                 Withdrawn.WITHDRAWN,
                 Deposited.NOT_DEPOSITED,
                 WithdrawalCancelled.CANCELLED,
@@ -249,7 +250,7 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
 
         // Then
         assertModelsAndStates(
-                ExchangeFinished.FINISHED,
+                Exchanged.FINISHED,
                 Withdrawn.WITHDRAWN,
                 Deposited.NOT_DEPOSITED,
                 WithdrawalCancelled.CANCELLED,
@@ -275,7 +276,7 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
 
         // Then
         assertModelsAndStates(
-                ExchangeFinished.FINISHED,
+                Exchanged.FINISHED,
                 Withdrawn.WITHDRAWN,
                 Deposited.NOT_DEPOSITED,
                 WithdrawalCancelled.CANCELLED,
@@ -301,7 +302,7 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
 
         // Then
         assertModelsAndStates(
-                ExchangeFinished.FINISHED,
+                Exchanged.FINISHED,
                 Withdrawn.WITHDRAWN,
                 Deposited.NOT_DEPOSITED,
                 WithdrawalCancelled.CANCELLED,
@@ -327,7 +328,7 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
 
         // Then
         assertModelsAndStates(
-                ExchangeFinished.FINISHED,
+                Exchanged.FINISHED,
                 Withdrawn.NOT_WITHDRAWN,
                 Deposited.NOT_DEPOSITED,
                 WithdrawalCancelled.NOT_CANCELLED,
@@ -350,7 +351,7 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
 
         // Then
         assertModelsAndStates(
-                ExchangeFinished.FINISHED,
+                Exchanged.FINISHED,
                 Withdrawn.NOT_WITHDRAWN,
                 Deposited.NOT_DEPOSITED,
                 WithdrawalCancelled.NOT_CANCELLED,
@@ -375,7 +376,7 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
 
         // Then
         assertModelsAndStates(
-                ExchangeFinished.FINISHED,
+                Exchanged.FINISHED,
                 Withdrawn.NOT_WITHDRAWN,
                 Deposited.NOT_DEPOSITED,
                 WithdrawalCancelled.NOT_CANCELLED,
@@ -399,7 +400,7 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
 
         // Then
         assertModelsAndStates(
-                ExchangeFinished.NOT_FINISHED,
+                Exchanged.NOT_FINISHED,
                 Withdrawn.NOT_WITHDRAWN,
                 Deposited.NOT_DEPOSITED,
                 WithdrawalCancelled.NOT_CANCELLED,
@@ -422,7 +423,7 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
 
         // Then
         assertModelsAndStates(
-                ExchangeFinished.NOT_FINISHED,
+                Exchanged.NOT_FINISHED,
                 Withdrawn.WITHDRAWN,
                 Deposited.NOT_DEPOSITED,
                 WithdrawalCancelled.NOT_CANCELLED,
@@ -502,7 +503,7 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
     }
 
     void assertModelsAndStates(
-            ExchangeFinished exchangeFinished,
+            Exchanged exchanged,
             Withdrawn withdrawn,
             Deposited deposited,
             WithdrawalCancelled withdrawalCancelled,
@@ -512,7 +513,7 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
                 .untilAsserted(() -> {
                     var request = getExchangeRequest();
                     assertThat(request).isNotNull();
-                    assertThat(request.isFinished()).isEqualTo(exchangeFinished.value());
+                    assertThat(request.isFinished()).isEqualTo(exchanged.value());
 
                     var withdrawal = getWithdrawal();
                     assertThat(withdrawal.isPresent()).isEqualTo(withdrawn.value());
@@ -529,30 +530,30 @@ class ExchangeCurrencyServiceIntegrationTest extends TestContainerSupport {
     }
 
     ExchangeRequest getExchangeRequest() {
-        return exchangeRequestJpaRepository.findAll().stream().findAny()
+        return jpaExchangeRequestRepository.findAll().stream().findAny()
                 .map(ExchangeRequestMapper::toDomain)
                 .orElseThrow(() -> new IllegalStateException("환전 요청을 찾을 수 없습니다."));
     }
 
     List<ExchangeState> getExchangeStates() {
-        return exchangeStateLogJpaRepository.findAll().stream()
+        return jpaExchangeStateLogRepository.findAll().stream()
                 .map(ExchangeStateLogMapper::toDomain)
                 .map(ExchangeStateLog::getState)
                 .toList();
     }
 
     Optional<Deposit> getDeposit() {
-        return depositJpaRepository.findAll().stream().findAny()
+        return jpaDepositRepository.findAll().stream().findAny()
                 .map(DepositMapper::toDomain);
     }
 
     Optional<Withdrawal> getWithdrawal() {
-        return withdrawalJpaRepository.findAll().stream().findAny()
+        return jpaWithdrawalRepository.findAll().stream().findAny()
                 .map(WithdrawalMapper::toDomain);
     }
 
     Optional<WithdrawalCancel> getWithdrawalCancel() {
-        return withdrawalCancelJpaRepository.findAll().stream().findAny()
+        return jpaWithdrawalCancelRepository.findAll().stream().findAny()
                 .map(WithdrawalCancelMapper::toDomain);
     }
 

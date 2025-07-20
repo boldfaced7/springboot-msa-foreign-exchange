@@ -2,8 +2,8 @@ package com.boldfaced7.fxexchange.exchange.domain.model;
 
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.enums.ExchangeState;
-import com.boldfaced7.fxexchange.exchange.domain.vo.LogId;
-import com.boldfaced7.fxexchange.exchange.domain.vo.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.log.LogId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

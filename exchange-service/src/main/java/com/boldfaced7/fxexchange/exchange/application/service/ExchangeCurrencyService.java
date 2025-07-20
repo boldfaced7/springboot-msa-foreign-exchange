@@ -3,26 +3,23 @@ package com.boldfaced7.fxexchange.exchange.application.service;
 import com.boldfaced7.fxexchange.common.UseCase;
 import com.boldfaced7.fxexchange.exchange.application.port.in.ExchangeCurrencyCommand;
 import com.boldfaced7.fxexchange.exchange.application.port.in.ExchangeCurrencyUseCase;
-import com.boldfaced7.fxexchange.exchange.application.port.out.event.PublishEventPort;
-import com.boldfaced7.fxexchange.exchange.application.port.out.exchange.SaveExchangeRequestPort;
 import com.boldfaced7.fxexchange.exchange.application.service.saga.ExchangeCurrencySagaOrchestrator;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeDetail;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.ExchangeDetail;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 
+@Primary
 @UseCase
 @RequiredArgsConstructor
 public class ExchangeCurrencyService implements ExchangeCurrencyUseCase {
 
-    private final SaveExchangeRequestPort saveExchangeRequestPort;
-    private final PublishEventPort publishEventPort;
     private final ExchangeCurrencySagaOrchestrator exchangeCurrencySagaOrchestrator;
 
     @Override
     public ExchangeDetail exchangeCurrency(ExchangeCurrencyCommand command) {
-        var saved = saveExchangeRequestPort.save(toModel(command));
-        publishExchangeEvent(saved);
-        return exchangeCurrencySagaOrchestrator.startExchange(saved);
+        var toBeRequested = toModel(command);
+        return exchangeCurrencySagaOrchestrator.startExchange(toBeRequested);
     }
 
     private ExchangeRequest toModel(ExchangeCurrencyCommand command) {
@@ -36,10 +33,5 @@ public class ExchangeCurrencyService implements ExchangeCurrencyUseCase {
                 command.quoteAmount(),
                 command.exchangeRate()
         );
-    }
-
-    private void publishExchangeEvent(ExchangeRequest exchange) {
-        exchange.markExchangeCurrencyStarted();
-        publishEventPort.publish(exchange);
     }
 }

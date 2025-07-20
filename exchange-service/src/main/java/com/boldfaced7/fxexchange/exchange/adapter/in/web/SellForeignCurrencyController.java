@@ -5,7 +5,7 @@ import com.boldfaced7.fxexchange.exchange.application.port.in.ExchangeCurrencyCo
 import com.boldfaced7.fxexchange.exchange.application.port.in.ExchangeCurrencyUseCase;
 import com.boldfaced7.fxexchange.exchange.domain.enums.CurrencyCode;
 import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
-import com.boldfaced7.fxexchange.exchange.domain.vo.*;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

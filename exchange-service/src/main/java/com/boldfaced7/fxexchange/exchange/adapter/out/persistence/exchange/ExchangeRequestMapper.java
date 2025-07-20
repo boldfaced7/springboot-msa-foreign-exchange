@@ -1,12 +1,13 @@
 package com.boldfaced7.fxexchange.exchange.adapter.out.persistence.exchange;
 
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.*;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.*;
 
 public class ExchangeRequestMapper {
-    public static ExchangeRequest toDomain(ExchangeRequestJpa jpa) {
+    public static ExchangeRequest toDomain(JpaExchangeRequest jpa) {
         return ExchangeRequest.of(
-                new RequestId(jpa.getExchangeRequestId()),
+                new RequestId(jpa.getRequestId()),
                 new ExchangeId(jpa.getExchangeId()),
                 new UserId(jpa.getUserId()),
 
@@ -18,14 +19,14 @@ public class ExchangeRequestMapper {
                 new QuoteAmount(jpa.getQuoteAmount()),
                 new ExchangeRate(jpa.getExchangeRate()),
 
-                new ExchangeFinished(jpa.isFinished()),
+                new Exchanged(jpa.isExchanged()),
                 jpa.getCreatedAt(),
                 jpa.getUpdatedAt()
         );
     }
 
-    public static ExchangeRequestJpa toJpa(ExchangeRequest domain) {
-        return new ExchangeRequestJpa(
+    public static JpaExchangeRequest toJpa(ExchangeRequest domain) {
+        return new JpaExchangeRequest(
                 (domain.getRequestId() == null) ? null : domain.getRequestId().value(),
                 domain.getExchangeId().value(),
                 domain.getUserId().value(),

@@ -10,7 +10,11 @@ import com.boldfaced7.fxexchange.exchange.domain.enums.Direction;
 import com.boldfaced7.fxexchange.exchange.domain.model.Deposit;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
 import com.boldfaced7.fxexchange.exchange.domain.model.Withdrawal;
-import com.boldfaced7.fxexchange.exchange.domain.vo.*;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.RequestId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.cancel.WithdrawalCancelId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.deposit.DepositId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.*;
+import com.boldfaced7.fxexchange.exchange.domain.vo.withdrawal.WithdrawalId;
 
 import java.time.LocalDateTime;
 
@@ -33,8 +37,8 @@ public class TestConstraints {
     public static final DepositId DEPOSIT_ID = new DepositId("depositId");
     public static final WithdrawalCancelId WITHDRAWAL_CANCEL_ID = new WithdrawalCancelId("withdrawalCancelId");
 
-    public static final ExchangeFinished EXCHANGE_FINISHED = new ExchangeFinished(true);
-    public static final ExchangeFinished NOT_EXCHANGE_FINISHED = new ExchangeFinished(false);
+    public static final Exchanged EXCHANGE_FINISHED = new Exchanged(true);
+    public static final Exchanged NOT_EXCHANGE_FINISHED = new Exchanged(false);
 
     public static final Count COUNT_ZERO = new Count(0);
     public static final Count COUNT_ONE = new Count(1);

@@ -7,6 +7,7 @@ import com.boldfaced7.fxexchange.exchange.application.service.saga.cancel.Cancel
 import com.boldfaced7.fxexchange.exchange.application.service.saga.deposit.CheckDepositService;
 import com.boldfaced7.fxexchange.exchange.application.service.saga.deposit.DepositService;
 import com.boldfaced7.fxexchange.exchange.application.service.saga.exchange.CompleteExchangeService;
+import com.boldfaced7.fxexchange.exchange.application.service.saga.exchange.CreateExchangeRequestService;
 import com.boldfaced7.fxexchange.exchange.application.service.saga.withdrawal.CheckWithdrawalService;
 import com.boldfaced7.fxexchange.exchange.application.service.saga.withdrawal.WithdrawService;
 import com.boldfaced7.fxexchange.exchange.domain.enums.TransactionType;
@@ -14,7 +15,7 @@ import com.boldfaced7.fxexchange.exchange.domain.event.cancel.WithdrawalCancelSu
 import com.boldfaced7.fxexchange.exchange.domain.event.deposit.*;
 import com.boldfaced7.fxexchange.exchange.domain.event.withdrawal.*;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeDetail;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.ExchangeDetail;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,6 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 @SagaOrchestrator
 @RequiredArgsConstructor
 public class ExchangeCurrencySagaOrchestratorImpl implements ExchangeCurrencySagaOrchestrator {
+
+    // 환전
+    private final CreateExchangeRequestService createExchangeRequestService;
+    private final CompleteExchangeService completeExchangeRequestService;
 
     // 출금
     private final WithdrawService withdrawService;
@@ -34,18 +39,16 @@ public class ExchangeCurrencySagaOrchestratorImpl implements ExchangeCurrencySag
     // 출금 취소
     private final CancelWithdrawalService cancelWithdrawalService;
 
-    // 환전
-    private final CompleteExchangeService completeExchangeService;
-
     private final ScheduleCheckRequestPort scheduleCheckRequestPort;
     private final SendWarningMessagePort sendWarningMessagePort;
 
 
     @Override
-    public ExchangeDetail startExchange(ExchangeRequest exchange) {
-        var withdrawn = withdrawService.withdraw(exchange);
-        var deposited = depositService.deposit(withdrawn.exchangeRequest());
-        var exchanged = completeExchangeService.succeedExchange(exchange.getRequestId());
+    public ExchangeDetail startExchange(ExchangeRequest toBeRequested) {
+        var requested = createExchangeRequestService.createExchangeRequest(toBeRequested);
+        var withdrawn = withdrawService.withdraw(requested);
+        var deposited = depositService.deposit(requested);
+        var exchanged = completeExchangeRequestService.succeedExchange(requested);
         return new ExchangeDetail(withdrawn, deposited, exchanged);
     }
 
@@ -55,7 +58,7 @@ public class ExchangeCurrencySagaOrchestratorImpl implements ExchangeCurrencySag
     @Override
     public void handle(WithdrawalFailed event) {
         // 환전 종료 처리
-        completeExchangeService.failExchange(
+        completeExchangeRequestService.failExchange(
                 event.requestId()
         );
     }
@@ -86,7 +89,7 @@ public class ExchangeCurrencySagaOrchestratorImpl implements ExchangeCurrencySag
     @Override
     public void handle(WithdrawalFailureChecked event) {
         // 환전 종료 처리
-        completeExchangeService.failExchange(
+        completeExchangeRequestService.failExchange(
                 event.requestId()
         );
     }
@@ -142,7 +145,7 @@ public class ExchangeCurrencySagaOrchestratorImpl implements ExchangeCurrencySag
     @Override
     public void handle(DepositSuccessChecked event) {
         // 환전 종료 처리
-        completeExchangeService.succeedExchange(
+        completeExchangeRequestService.succeedExchange(
                 event.requestId()
         );
     }
@@ -183,7 +186,7 @@ public class ExchangeCurrencySagaOrchestratorImpl implements ExchangeCurrencySag
     @Override
     public void handle(WithdrawalCancelSucceeded event) {
         // 환전 종료 처리
-        completeExchangeService.failExchange(
+        completeExchangeRequestService.failExchange(
                 event.requestId()
         );
     }

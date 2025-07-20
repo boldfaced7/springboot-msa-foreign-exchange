@@ -7,8 +7,8 @@ import com.boldfaced7.fxexchange.exchange.application.port.out.cache.LoadExchang
 import com.boldfaced7.fxexchange.exchange.application.port.out.event.PublishEventPort;
 import com.boldfaced7.fxexchange.exchange.domain.exception.ExchangeRequestNotFoundException;
 import com.boldfaced7.fxexchange.exchange.domain.model.ExchangeRequest;
-import com.boldfaced7.fxexchange.exchange.domain.vo.Count;
-import com.boldfaced7.fxexchange.exchange.domain.vo.ExchangeId;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.Count;
+import com.boldfaced7.fxexchange.exchange.domain.vo.exchange.ExchangeId;
 import lombok.RequiredArgsConstructor;
 
 @UseCase
