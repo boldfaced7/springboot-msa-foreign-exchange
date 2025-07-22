@@ -1,5 +1,7 @@
 package com.boldfaced7.fxexchange.exchange.application.service.saga.exchange.impl;
 
+import com.boldfaced7.fxexchange.exchange.application.exception.ExchangeAlreadyRequestedException;
+import com.boldfaced7.fxexchange.exchange.application.port.aop.Idempotent;
 import com.boldfaced7.fxexchange.exchange.application.port.out.event.PublishEventPort;
 import com.boldfaced7.fxexchange.exchange.application.port.out.exchange.SaveExchangeRequestPort;
 import com.boldfaced7.fxexchange.exchange.application.service.saga.exchange.CreateExchangeRequestService;
@@ -17,6 +19,11 @@ public class CreateExchangeRequestServiceImpl implements CreateExchangeRequestSe
 
     @Override
     @Transactional
+    @Idempotent(
+            prefix = "exchange:request:",
+            key = "#toBeSaved.exchangeId",
+            exceptionOnDuplicate = ExchangeAlreadyRequestedException.class
+    )
     public ExchangeRequest createExchangeRequest(ExchangeRequest toBeSaved) {
         var saved = saveExchangeRequestPort.save(toBeSaved);
         saved.markExchangeCurrencyStarted();

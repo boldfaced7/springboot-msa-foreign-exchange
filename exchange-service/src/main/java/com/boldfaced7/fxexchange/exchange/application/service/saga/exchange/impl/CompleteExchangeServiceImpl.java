@@ -1,6 +1,7 @@
 package com.boldfaced7.fxexchange.exchange.application.service.saga.exchange.impl;
 
 import com.boldfaced7.fxexchange.exchange.application.port.aop.DistributedLock;
+import com.boldfaced7.fxexchange.exchange.application.port.aop.Idempotent;
 import com.boldfaced7.fxexchange.exchange.application.port.out.event.PublishEventPort;
 import com.boldfaced7.fxexchange.exchange.application.port.out.exchange.LoadExchangeRequestPort;
 import com.boldfaced7.fxexchange.exchange.application.port.out.exchange.UpdateExchangeRequestPort;
@@ -22,7 +23,6 @@ public class CompleteExchangeServiceImpl implements CompleteExchangeService {
     private final PublishEventPort publishEventPort;
 
     @Override
-    @DistributedLock(prefix = "order:lock:", key = "#exchangeRequest.requestId")
     @Transactional
     public ExchangeRequest succeedExchange(ExchangeRequest exchangeRequest) {
         publishExchangeEvent(exchangeRequest, true);
@@ -30,15 +30,15 @@ public class CompleteExchangeServiceImpl implements CompleteExchangeService {
     }
 
     @Override
-    @DistributedLock(prefix = "order:lock:", key = "#requestId")
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Idempotent(prefix = "exchange:succeed:", key = "#requestId")
     public ExchangeRequest succeedExchange(RequestId requestId) {
         return completeExchange(requestId, true);
     }
 
     @Override
-    @DistributedLock(prefix = "order:lock:", key = "#requestId")
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Idempotent(prefix = "exchange:fail:", key = "#requestId")
     public ExchangeRequest failExchange(RequestId requestId) {
         return completeExchange(requestId, false);
     }

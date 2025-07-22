@@ -1,6 +1,7 @@
 package com.boldfaced7.fxexchange.exchange.application.service;
 
 import com.boldfaced7.fxexchange.common.UseCase;
+import com.boldfaced7.fxexchange.exchange.application.port.aop.Idempotent;
 import com.boldfaced7.fxexchange.exchange.application.port.in.CompleteWithdrawalCancelCommand;
 import com.boldfaced7.fxexchange.exchange.application.port.in.CompleteWithdrawalCancelUseCase;
 import com.boldfaced7.fxexchange.exchange.application.port.out.cache.LoadExchangeRequestCachePort;
@@ -23,6 +24,7 @@ public class CompleteWithdrawalCancelService implements CompleteWithdrawalCancel
 
     @Override
     @Transactional
+    @Idempotent(prefix = "cancel-withdrawal:response:", key = "#command.exchangeId")
     public void completeWithdrawalCancel(CompleteWithdrawalCancelCommand command) {
         var exchange = getExchange(command.exchangeId());
         var withdrawalCancel = toDomain(exchange, command);

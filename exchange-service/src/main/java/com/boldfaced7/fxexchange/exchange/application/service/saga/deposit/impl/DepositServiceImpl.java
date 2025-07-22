@@ -1,5 +1,6 @@
 package com.boldfaced7.fxexchange.exchange.application.service.saga.deposit.impl;
 
+import com.boldfaced7.fxexchange.exchange.application.port.aop.Idempotent;
 import com.boldfaced7.fxexchange.exchange.application.port.out.cache.SaveExchangeRequestCachePort;
 import com.boldfaced7.fxexchange.exchange.application.port.out.deposit.RequestDepositPort;
 import com.boldfaced7.fxexchange.exchange.application.port.out.deposit.SaveDepositPort;
@@ -24,6 +25,7 @@ public class DepositServiceImpl implements DepositService {
 
     @Override
     @Transactional
+    @Idempotent(prefix = "deposit:request:", key = "#exchange.exchangeId")
     public DepositDetail deposit(ExchangeRequest exchange) {
         var deposit = requestDeposit(exchange);
 

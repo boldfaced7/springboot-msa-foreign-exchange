@@ -1,5 +1,6 @@
 package com.boldfaced7.fxexchange.exchange.application.service.saga.withdrawal.impl;
 
+import com.boldfaced7.fxexchange.exchange.application.port.aop.Idempotent;
 import com.boldfaced7.fxexchange.exchange.application.port.out.cache.SaveExchangeRequestCachePort;
 import com.boldfaced7.fxexchange.exchange.application.port.out.event.PublishEventPort;
 import com.boldfaced7.fxexchange.exchange.application.port.out.withdrawal.RequestWithdrawalPort;
@@ -26,6 +27,7 @@ public class WithdrawServiceImpl implements WithdrawService {
 
     @Override
     @Transactional
+    @Idempotent(prefix = "withdraw:request:", key = "#exchange.exchangeId")
     public WithdrawalDetail withdraw(ExchangeRequest exchange) {
         var withdrawal = requestWithdrawal(exchange);
 
