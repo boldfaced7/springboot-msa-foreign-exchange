@@ -26,56 +26,53 @@
 ```mermaid
 sequenceDiagram
     participant Client
-    participant ExchangeService
-    participant WithdrawalPort
-    participant DepositPort
-    participant ExchangeRequestPort
+    participant Exchange
+    participant Withdrawal
+    participant Deposit
 
-    Client->>ExchangeService: exchangeCurrency(command)
-    ExchangeService->>WithdrawalPort: withdraw(withdrawalRequest)
-    WithdrawalPort-->>ExchangeService: withdrawal(SUCCESS)
-    ExchangeService->>DepositPort: deposit(depositRequest)
-    DepositPort-->>ExchangeService: deposit(SUCCESS)
-    ExchangeService-->>Client: exchangeResult
+    Client->>Exchange: exchangeCurrency(command)
+    Exchange->>Withdrawal: withdraw(withdrawalRequest)
+    Withdrawal-->>Exchange: withdrawal(SUCCESS)
+    Exchange->>Deposit: deposit(depositRequest)
+    Deposit-->>Exchange: deposit(SUCCESS)
+    Exchange-->>Client: exchangeResult
 ```
 
 ### 지연 확인 플로우
 ```mermaid
 sequenceDiagram
     participant Client
-    participant ExchangeService
-    participant WithdrawalPort
-    participant DepositPort
-    participant CachePort
-    participant SchedulePort
+    participant Exchange
+    participant Withdrawal
+    participant Deposit
+    participant Scheduler
 
-    Client->>ExchangeService: exchangeCurrency(command)
-    ExchangeService->>WithdrawalPort: withdraw(withdrawalRequest)
-    WithdrawalPort-->>ExchangeService: withdrawal(SUCCESS)
-    ExchangeService->>DepositPort: deposit(depositRequest)
-    DepositPort-->>ExchangeService: RuntimeException(UNKNOWN)
-    ExchangeService->>CachePort: save(exchangeRequest)
-    ExchangeService->>SchedulePort: scheduleCheckRequest(depositCheck)
-    SchedulePort-->>ExchangeService: scheduled
+    Client->>Exchange: exchangeCurrency(command)
+    Exchange->>Withdrawal: withdraw(withdrawalRequest)
+    Withdrawal-->>Exchange: withdrawal(SUCCESS)
+    Exchange->>Deposit: deposit(depositRequest)
+    Deposit-->>Exchange: RuntimeException(UNKNOWN)
+    Exchange->>Scheduler: scheduleCheckRequest(depositCheck)
+    Scheduler-->>Exchange: scheduled
 ```
 
 ### 실패 복구 플로우 (롤백)
 ```mermaid
 sequenceDiagram
     participant Client
-    participant ExchangeService
-    participant WithdrawalPort
-    participant DepositPort
-    participant CancelPort
+    participant Exchange
+    participant Withdrawal
+    participant Deposit
+    participant Withdrawal
 
-    Client->>ExchangeService: exchangeCurrency(command)
-    ExchangeService->>WithdrawalPort: withdraw(withdrawalRequest)
-    WithdrawalPort-->>ExchangeService: withdrawal(SUCCESS)
-    ExchangeService->>DepositPort: deposit(depositRequest)
-    DepositPort-->>ExchangeService: deposit(FAILURE)
-    ExchangeService->>CancelPort: cancelWithdrawal(withdrawalId, amount)
-    CancelPort-->>ExchangeService: cancelled
-    ExchangeService-->>Client: RuntimeException
+    Client->>Exchange: exchangeCurrency(command)
+    Exchange->>Withdrawal: withdraw(withdrawalRequest)
+    Withdrawal-->>Exchange: withdrawal(SUCCESS)
+    Exchange->>Deposit: deposit(depositRequest)
+    Deposit-->>Exchange: deposit(FAILURE)
+    Exchange->>Withdrawal: cancelWithdrawal(withdrawalId, amount)
+    Withdrawal-->>Exchange: cancelled
+    Exchange-->>Client: RuntimeException
 ```
 ---
 
@@ -83,7 +80,7 @@ sequenceDiagram
 
 | 상태                        | 설명                                 | 다음 가능 상태                                      |
 |-----------------------------|--------------------------------------|-----------------------------------------------------|
-| `XCHANGE_CURRENCY_STARTED`   | 환전 요청 접수                       | `WITHDRAWAL_SUCCEEDED`, `CHECKING_WITHDRAWAL_REQUIRED`, `EXCHANGE_CURRENCY_FAILED` |
+| `EXCHANGE_CURRENCY_STARTED`   | 환전 요청 접수                       | `WITHDRAWAL_SUCCEEDED`, `CHECKING_WITHDRAWAL_REQUIRED`, `EXCHANGE_CURRENCY_FAILED` |
 | `CHECKING_WITHDRAWAL_REQUIRED`| 출금 처리 중 (결과 모름)             | `WITHDRAWAL_SUCCEEDED`, `EXCHANGE_CURRENCY_FAILED`      |
 | `WITHDRAWAL_SUCCEEDED`        | 출금 완료                            | `EXCHANGE_CURRENCY_SUCCEEDED`, `CHECKING_DEPOSIT_REQUIRED`, `CANCELING_WITHDRAWAL_REQUIRED` |
 | `CHECKING_DEPOSIT_REQUIRED`   | 입금 처리 중 (결과 모름)             | `EXCHANGE_CURRENCY_SUCCEEDED`, `CANCELING_WITHDRAWAL_REQUIRED` |
