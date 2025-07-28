@@ -12,6 +12,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
+import static com.boldfaced7.fxexchange.exchange.adapter.in.messaging.MessageDeserializer.*;
+
 @Slf4j
 @MessagingAdapter
 @Component
@@ -40,8 +42,7 @@ public class WithdrawalCancelKafkaConsumer {
         log.info("[WithdrawalCancel] 출금 취소 메시지 수신 - message: {}", payload);
 
         try {
-            var cancelMessage = MessageDeserializer.deserializeMessage(payload, WithdrawalCancelMessage.class);
-            var command = toCommand(cancelMessage, direction);
+            var command = toCommand(payload, direction);
 
             log.info("[WithdrawalCancel] 출금 취소 처리 시작 - exchangeId: {}, withdrawalCancelId: {}",
                     command.exchangeId().value(), command.withdrawalCancelId().value());
@@ -51,6 +52,7 @@ public class WithdrawalCancelKafkaConsumer {
             log.info("[WithdrawalCancel] 출금 취소 처리 완료 - exchangeId: {}, withdrawalCancelId: {}",
                     command.exchangeId().value(), command.withdrawalCancelId().value());
             ack.acknowledge();
+
         } catch (Exception e) {
             log.error("[WithdrawalCancel] 출금 취소 처리 실패 - message: {}, error: {}",
                     payload, e.getMessage(), e);
@@ -59,7 +61,9 @@ public class WithdrawalCancelKafkaConsumer {
 
     }
 
-    private CompleteWithdrawalCancelCommand toCommand(WithdrawalCancelMessage message, Direction direction) {
+    private CompleteWithdrawalCancelCommand toCommand(String payload, Direction direction) {
+        var message = deserializeMessage(payload, WithdrawalCancelMessage.class);
+
         return new CompleteWithdrawalCancelCommand(
                 new WithdrawalCancelId(message.withdrawalCancelId()),
                 new ExchangeId(message.exchangeId()),

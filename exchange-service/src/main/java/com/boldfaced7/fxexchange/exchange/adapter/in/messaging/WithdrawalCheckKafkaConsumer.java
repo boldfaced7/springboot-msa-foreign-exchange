@@ -28,8 +28,7 @@ public class WithdrawalCheckKafkaConsumer {
         log.info("[WithdrawalCheck] 출금 확인 메시지 수신 - message: {}", message);
         
         try {
-            var checkMessage = MessageDeserializer.deserializeMessage(message, WithdrawalCheckMessage.class);
-            var command = toCommand(checkMessage);
+            var command = toCommand(message);
             
             log.info("[WithdrawalCheck] 출금 확인 처리 시작 - exchangeId: {}, count: {}, direction: {}", 
                     command.exchangeId().value(), command.count().value(), command.direction());
@@ -45,7 +44,9 @@ public class WithdrawalCheckKafkaConsumer {
         }
     }
 
-    private CheckWithdrawalWithDelayCommand toCommand(WithdrawalCheckMessage message) {
+    private CheckWithdrawalWithDelayCommand toCommand(String payload) {
+        var message = MessageDeserializer.deserializeMessage(payload, WithdrawalCheckMessage.class);
+
         return new CheckWithdrawalWithDelayCommand(
                 new ExchangeId(message.exchangeId()),
                 new Count(message.count()),

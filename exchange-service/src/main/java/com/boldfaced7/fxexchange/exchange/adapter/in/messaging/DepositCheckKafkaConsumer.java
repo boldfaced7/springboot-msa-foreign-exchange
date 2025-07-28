@@ -28,8 +28,7 @@ public class DepositCheckKafkaConsumer {
         log.info("[DepositCheck] 입금 확인 메시지 수신 - message: {}", message);
         
         try {
-            var checkMessage = MessageDeserializer.deserializeMessage(message, DepositCheckMessage.class);
-            var command = toCommand(checkMessage);
+            var command = toCommand(message);
             
             log.info("[DepositCheck] 입금 확인 처리 시작 - exchangeId: {}, count: {}, direction: {}", 
                     command.exchangeId().value(), command.count().value(), command.direction());
@@ -45,7 +44,9 @@ public class DepositCheckKafkaConsumer {
         }
     }
 
-    private CheckDepositWithDelayCommand toCommand(DepositCheckMessage message) {
+    private CheckDepositWithDelayCommand toCommand(String payload) {
+        var message = MessageDeserializer.deserializeMessage(payload, DepositCheckMessage.class);
+
         return new CheckDepositWithDelayCommand(
                 new ExchangeId(message.exchangeId()),
                 new Count(message.count()),
