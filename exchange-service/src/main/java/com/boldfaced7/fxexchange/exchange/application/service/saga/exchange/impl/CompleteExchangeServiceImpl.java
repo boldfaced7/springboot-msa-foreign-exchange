@@ -30,14 +30,14 @@ public class CompleteExchangeServiceImpl implements CompleteExchangeService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Transactional
     @Idempotent(prefix = "exchange:succeed:", key = "#requestId")
     public ExchangeRequest succeedExchange(RequestId requestId) {
         return completeExchange(requestId, true);
     }
 
     @Override
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Transactional
     @Idempotent(prefix = "exchange:fail:", key = "#requestId")
     public ExchangeRequest failExchange(RequestId requestId) {
         return completeExchange(requestId, false);
