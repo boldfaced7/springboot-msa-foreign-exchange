@@ -36,6 +36,7 @@ public class WithdrawalCancelKafkaPublisher implements CancelWithdrawalPort {
         var kafkaMessage = MessageBuilder.withPayload(serialized)
                 .setHeader(KafkaHeaders.TOPIC, requestTopic)
                 .setHeader(KafkaHeaders.REPLY_TOPIC, responseTopic)
+                .setHeader(KafkaHeaders.KEY, exchangeId.value())
                 .build();
         
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(kafkaMessage);
