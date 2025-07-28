@@ -60,29 +60,40 @@ spring:
 
 
 # Resilience4J 설정 (Circuit Breaker만)
+
 resilience4j:
   circuitbreaker:
     instances:
       fxCircuitBreaker:
-        sliding-window-size: 10
-        minimum-number-of-calls: 5
-        failure-rate-threshold: 50
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 200
+        minimum-number-of-calls: 100
+        failure-rate-threshold: 20
         wait-duration-in-open-state: 10s
-        permitted-number-of-calls-in-half-open-state: 3
+        permitted-number-of-calls-in-half-open-state: 5
+        automatic-transition-from-open-to-half-open-enabled: true
         record-exceptions:
-          - org.springframework.web.reactive.function.client.WebClientResponseException
           - org.springframework.web.reactive.function.client.WebClientRequestException
+          - org.springframework.web.reactive.function.client.WebClientResponseException
           - java.util.concurrent.TimeoutException
+        ignore-exceptions:
+          - org.springframework.web.reactive.function.client.WebClientResponseException
+
       krwCircuitBreaker:
-        sliding-window-size: 10
-        minimum-number-of-calls: 5
-        failure-rate-threshold: 50
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 200
+        minimum-number-of-calls: 100
+        failure-rate-threshold: 20
         wait-duration-in-open-state: 10s
-        permitted-number-of-calls-in-half-open-state: 3
+        permitted-number-of-calls-in-half-open-state: 5
+        automatic-transition-from-open-to-half-open-enabled: true
         record-exceptions:
-          - org.springframework.web.reactive.function.client.WebClientResponseException
           - org.springframework.web.reactive.function.client.WebClientRequestException
+          - org.springframework.web.reactive.function.client.WebClientResponseException
           - java.util.concurrent.TimeoutException
+        ignore-exceptions:
+          - org.springframework.web.reactive.function.client.WebClientResponseException
+
 
 # Actuator 설정
 management:

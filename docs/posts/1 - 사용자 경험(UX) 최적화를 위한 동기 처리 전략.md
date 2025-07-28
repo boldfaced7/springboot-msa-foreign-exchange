@@ -191,29 +191,45 @@ public class WebClientConfig {
     circuitbreaker:
       instances:
         fxCircuitBreaker:
-          sliding-window-size: 10
-          minimum-number-of-calls: 5
-          failure-rate-threshold: 50
+          sliding-window-type: COUNT_BASED
+          sliding-window-size: 200
+          minimum-number-of-calls: 100
+          failure-rate-threshold: 20
           wait-duration-in-open-state: 10s
-          permitted-number-of-calls-in-half-open-state: 3
+          permitted-number-of-calls-in-half-open-state: 5
+          automatic-transition-from-open-to-half-open-enabled: true
           record-exceptions:
-            - org.springframework.web.reactive.function.client.WebClientResponseException
             - org.springframework.web.reactive.function.client.WebClientRequestException
+            - org.springframework.web.reactive.function.client.WebClientResponseException
             - java.util.concurrent.TimeoutException
+          ignore-exceptions:
+            - org.springframework.web.reactive.function.client.WebClientResponseException
+
         krwCircuitBreaker:
         	# 이하 동일
   ```
 
-  - `sliding-window-size`: 최근 10개의 호출 결과를 기준으로 실패율을 계산
-  - `minimum-number-of-calls`: 최소 5개 이상의 호출이 발생해야 서킷 브레이커가 실패율을 계산하기 시작
-  - `failure-rate-threshold`: 실패율이 50%를 초과하면 서킷을 `OPEN` 상태로 전환
+  - `sliding-window-type`: `COUNT_BASED`로 설정하여, 최근 호출 횟수를 기반으로 실패율을 계산
+  - `sliding-window-size`: 최근 200개의 호출 결과를 기준으로 실패율을 계산
+  - `minimum-number-of-calls`: 최소 100개 이상의 호출이 발생해야 서킷 브레이커가 실패율을 계산하기 시작
+  - `failure-rate-threshold`: 실패율이 20%를 초과하면 서킷을 `OPEN` 상태로 전환
   - `wait-duration-in-open-state`: `OPEN` 상태의 서킷을 10초 동안 유지하며 모든 호출을 즉시 실패 처리
+  - `permitted-number-of-calls-in-half-open-state`: `OPEN` 상태에서 10초가 지나면 `HALF_OPEN` 상태로 전환하고, 5개의 테스트 호출만 허용
+  - `automatic-transition-from-open-to-half-open-enabled`: `true`로 설정하여 `wait-duration-in-open-state` 시간이 지나면 자동으로 `OPEN`에서 `HALF_OPEN` 상태로 전환
   - `record-exceptions`: 특정 예외 발생 시 이를 실패로 기록
+  - `ignore-exceptions`: `WebClientResponseException`은 실패로 기록하지 않음
 
-  - `permitted-number-of-calls-in-half-open-state`: `OPEN` 상태의 서킷을 10초 후 `HALF_OPEN` 상태로 전환하고, 3개의 호출만 허용
-      - 3개의 호출이 성공하면 서킷을 `CLOSED` 상태로 전환
-      - 3개의 호출이 실패하면 다시 `OPEN` 상태로 전환
+<br>
 
+### 1.1.1. 대용량 트래픽 및 중요도를 고려한 설정값 상세 설명
+
+이 설정은 대규모 트래픽이 예상되는 MSA 환경에서, 환전의 핵심 단계인 계좌 입출금 API의 안정성을 보장하기 위해 신중하게 선택되었습니다.
+
+-   **`sliding-window-size: 200`, `minimum-number-of-calls: 100`**: 대용량 트래픽 하에서는 일시적인 소규모 오류가 발생할 수 있습니다. 200개의 넓은 창과 100개 이상의 최소 호출 수를 요구함으로써, 순간적인 장애나 서비스 시작 초기의 불안정한 상태로 인해 서킷이 너무 민감하게 반응하는 것을 방지합니다. 이는 통계적으로 유의미한 샘플을 통해 계좌 서비스의 실제 장애 상황을 더 정확하게 판단하기 위함입니다.
+
+-   **`failure-rate-threshold: 20`**: 20%라는 비교적 낮은 실패율 임계값은, 금융 거래의 중요성을 반영합니다. 5번의 요청 중 1번이 실패하는 상황은 심각한 문제로 간주하고, 신속하게 서킷을 열어 장애가 확산되는 것을 막고 사용자의 추가적인 피해를 방지합니다.
+
+-   **`wait-duration-in-open-state: 10s`**: 서킷이 열려있는 10초 동안 계좌 서비스는 복구할 시간을 갖게 됩니다. 이는 과부하, 일시적인 네트워크 문제 등 흔한 장애 상황에서 회복하기에 충분한 시간입니다.
 
 <br>
 
