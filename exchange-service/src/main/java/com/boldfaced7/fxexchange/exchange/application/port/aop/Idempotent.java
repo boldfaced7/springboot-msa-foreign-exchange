@@ -17,6 +17,6 @@ public @interface Idempotent {
 
     Class<? extends RuntimeException> exceptionOnDuplicate() default DuplicateRequestException.class;
 
-    long expiration() default 24L;
-    TimeUnit timeUnit() default TimeUnit.HOURS;
+    long expiration() default 5L;
+    TimeUnit timeUnit() default TimeUnit.MINUTES;
 } 
