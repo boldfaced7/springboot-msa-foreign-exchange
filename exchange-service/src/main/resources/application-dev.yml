@@ -35,24 +35,29 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-      acks: all
-      retries: 3
-      enable-idempotence: true
-      max-in-flight-requests-per-connection: 5
-      linger-ms: 5
-      compression-type: snappy
-      request-timeout-ms: 30000
-      max-block-ms: 60000
+      properties:
+        acks: all
+        enable.idempotence: true
+        retries: 2147483647
+        delivery.timeout.ms: 120000  # request-timeout-ms와 max-block-ms를 대체
+
+        linger.ms: 5
+        compression.type: snappy
+        max.in.flight.requests.per.connection: 5
+
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       group-id: exchange-service-group
-      enable-auto-commit: false
-      auto-offset-reset: earliest
-      max-poll-interval-ms: 300000
-      max-poll-records: 500
-      session-timeout-ms: 10000
-      heartbeat-interval-ms: 3000
+      properties:
+        max.poll.interval.ms: 300000
+        session.timeout.ms: 10000
+        heartbeat.interval.ms: 3000
+
+        enable.auto.commit: false
+        auto.offset.reset: earliest
+        max.poll.records: 500
+
 
 # Resilience4J 설정 (Circuit Breaker만)
 resilience4j:
@@ -90,10 +95,6 @@ management:
       show-details: always
     circuitbreakers:
       enabled: true
-  metrics:
-    export:
-      prometheus:
-        enabled: true
 
 server:
   port: 8081
