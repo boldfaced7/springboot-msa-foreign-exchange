@@ -23,12 +23,12 @@ MSA 환경에서는 여러 서비스에 걸친 작업을 하나의 DB 트랜잭�
 
 ### 마이크로서비스 구성
 
-| Service | Role | Description |
-| :--- | :--- | :--- |
-| **Exchange Service** | `Orchestrator` | 환전 사가 트랜잭션의 전체 흐름을 조율하고, 각 참여 서비스의 트랜잭션과 보상 트랜잭션을 관리합니다. |
-| **KRW Account Service** | `Participant` | 원화(KRW) 계좌의 출금, 출금 취소(보상) 등 로컬 트랜잭션을 담당합니다. |
-| **FX Account Service** | `Participant` | 외화(FX) 계좌의 입금, 입금 취소(보상) 등 로컬 트랜잭션을 담당합니다. |
-| **Message Scheduler** | `Helper` | 외부 서비스의 일시적 장애 시, 재시도 메시지를 Kafka에 예약 발행하여 최종적인 데이터 정합성을 보장합니다. |
+| Service                 | Role           | Description                                                    |
+|:------------------------|:---------------|:---------------------------------------------------------------|
+| **Exchange Service**    | `Orchestrator` | 환전 사가 트랜잭션의 전체 흐름을 조율하고, 각 참여 서비스의 트랜잭션과 보상 트랜잭션을 관리합니다.       |
+| **KRW Account Service** | `Participant`  | 원화(KRW) 계좌의 입출금, 출금 취소(보상) 등 로컬 트랜잭션을 담당합니다.                   |
+| **FX Account Service**  | `Participant`  | 외화(FX) 계좌의 입출금, 출금 취소(보상) 등 로컬 트랜잭션을 담당합니다.                    |
+| **Message Scheduler**   | `Helper`       | 외부 서비스의 일시적 장애 시, 재시도 메시지를 Kafka에 예약 발행하여 최종적인 데이터 정합성을 보장합니다. |
 
 <br>
 
